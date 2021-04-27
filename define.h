@@ -74,3 +74,7 @@ int collision_m [OBJ_ON_SCREEN][2];
 
 int fire[2];// casin0000
 
+bool end_player;	//astronave del giocatore distrutta
+bool end_enemis;	//le astronavi nemiche sono tutte distrutte
+bool end_layer;		//le astronavi nemiche sono arrivate all'ultimo layer e vincono
+
