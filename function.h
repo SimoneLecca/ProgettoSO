@@ -19,3 +19,6 @@ void* t_astronave1 (void* arg);
 
 struct oggetto elimina();
 ///void aggiungi_job (struct* oggetto);
+
+//funzione per generare gli id degli oggetti in gioco
+int generatorId();

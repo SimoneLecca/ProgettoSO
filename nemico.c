@@ -11,11 +11,11 @@ void* t_bomba(void* arg){
 	struct oggetto astronave = *(struct oggetto*)arg;
 
 	struct oggetto bomba;
-	bomba.id = BOMBA;
+	bomba.id = generatorId();
 	bomba.sprite = "*";
 	bomba.dim=1;
 	bomba.vite=1;
-	bomba.id_thread = pthread_self();
+	bomba.tipo=BOMBA;
 	bomba.x = astronave.x + (int)(astronave.dim/2);
 	bomba.y = astronave.y +1;
 
@@ -60,7 +60,6 @@ void* t_astronave2 (void* arg){
 	astronave.x = astronaveLV1.x;
 	astronave.y = astronaveLV1.y;
 	astronave.vite=2;
-	astronave.id_thread = pthread_self();
 
 	int countB = 1; 	/*contatore per bomba*/
 	int direction=1;    /* Spostamento orizzontale */
@@ -72,7 +71,7 @@ void* t_astronave2 (void* arg){
 			collision_m[astronave.id][0]=0;
 
 			/*COLLISIONE CON MISSILE*/
-			if(collision_m[astronave.id][1]==MISSILE1 || collision_m[astronave.id][1]==MISSILE2){
+			if(collision_m[astronave.id][1]==MISSILE){
 				astronave.vite--;
 				beep();
 				aggiungi_job(astronave);
@@ -113,16 +112,16 @@ void* t_astronave2 (void* arg){
 void* t_astronave1 (void* arg){
 	pthread_t astronaveLV2;
 	pthread_t bomba;
-;
+
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV1*/
 	struct oggetto astronave; // contiene i dati del giocatore
-	astronave.id = *(int *)arg;
+	astronave.id = generatorId(); //*(int *)arg;
 	astronave.sprite = "<@>";
 	astronave.dim=3;
 	astronave.x = MINX;
 	astronave.y = MINY;
+	astronave.tipo= ASTRONAVE1;
 	astronave.vite=1;
-	astronave.id_thread = pthread_self();
 	
 	int countB = 1; 	/*contatore per bomba*/
 	int direction=1;    /* Spostamento orizzontale */
@@ -134,7 +133,7 @@ void* t_astronave1 (void* arg){
 			collision_m[astronave.id][0]=0;
 
 			/*COLLISIONE CON MISSILE*/
-			if(collision_m[astronave.id][1]==MISSILE1 || collision_m[astronave.id][1]==MISSILE2){
+			if(collision_m[astronave.id][1]==MISSILE){
 				astronave.vite--;
 				beep();
 				aggiungi_job(astronave);

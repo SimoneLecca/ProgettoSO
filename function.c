@@ -1,6 +1,18 @@
 #include "function.h"
 #include "define.h"
 
+//funzione per generare gli id degli oggetti in gioco
+int generatorId(){
+	int returnId=0;
+	pthread_mutex_lock(&mutex_id);
+	if(newId <= OBJ_ON_SCREEN)
+		newId++;
+		returnId=newId;
+	pthread_mutex_unlock(&mutex_id);
+	
+	return returnId;
+}
+
 
 /*aggiunge un nuova posizine nel buffer*/
 void aggiungi_job (struct oggetto new_obj){
@@ -63,7 +75,7 @@ int isColliding(struct oggetto obj, struct oggetto all_obj[]){
 			|| (all_obj[i].x+all_obj[i].dim >= obj.x && all_obj[i].x+all_obj[i].dim<= obj.x + obj.dim)) 
 			&& obj.y == all_obj[i].y){
 				/*COLLISIONE RILEVATA*/
-				return all_obj[i].id;
+				return all_obj[i].tipo;
 			}
 		}
 	}

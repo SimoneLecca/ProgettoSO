@@ -8,14 +8,18 @@ void start(){
 	pthread_mutex_t mutex_collision = PTHREAD_MUTEX_INITIALIZER; // mutex per l'accesso alla matrice per la gestione delle collisioni
 	pthread_mutex_t mutex_fire = PTHREAD_MUTEX_INITIALIZER; // mutex per l'accesso alla variabile utilizzata per quando si sprara
 	pthread_mutex_t mutex_astronave = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t mutex_id = PTHREAD_MUTEX_INITIALIZER;
 
 	int counter=0; // contatore per il buffer
 
 	int fire[2]= {0,0};// casin0000
-
+	
+	
 	end_player= false;	//astronave del giocatore distrutta
 	end_enemis= false;	//le astronavi nemiche sono tutte distrutte
 	end_layer= false;	//le astronavi nemiche sono arrivate all'ultimo layer e vincono	
+	
+	newId=0; //varibile per generare gli id degli oggetti in gioco
 }
 
 /*inizializza il semaforo*/

@@ -6,19 +6,14 @@
 void* t_missile(void* arg){
 	/*dichiaro e inizializzo il missile*/
 	struct oggetto missile;
-	missile.id = *(int *)arg;
+	int* param = arg;
+	missile.id = param[0];
+	missile.tipo=MISSILE;
 	missile.sprite = "|";
 	missile.dim=1;
-	pthread_mutex_lock(&mutex_fire); // blocco mutex per la variabile globale
-	if (missile.id == MISSILE2)
-		missile.x=fire[1];
-	else
-		missile.x = fire[1]+5; // in posizione 1 la variabile globale contiene la cordinata di dove è stato lanciato il missile 
-	pthread_mutex_unlock(&mutex_fire);// sblocco mutex per la variabile globale
-	
+	missile.x = param[1];
 	missile.y = MAXY-MINY-1;
 	missile.vite=1;
-	missile.id_thread = pthread_self();
 
 	while(missile.vite > 0){
 		/*Controllo se il missile ha Colliso*/
@@ -45,14 +40,16 @@ void* t_missile(void* arg){
 void* t_lanciatore_missili(void* arg){
 	pthread_t missile1,missile2; // id thread dei missili
 	bool flag=false; // flag generico
-	int* id_missile = (int *) malloc(sizeof(int));
-	*id_missile = MISSILE1;
-	int* id_missile2 = (int *) malloc(sizeof(int));
-	*id_missile2 = MISSILE2;
+	int* id_missile = (int *) malloc(sizeof(int)*2);
+	id_missile[0] = generatorId();
+	int* id_missile2 = (int *) malloc(sizeof(int)*2);
+	id_missile2[0] = generatorId();
 	
 	while(1){
 		pthread_mutex_lock(&mutex_fire);
 			flag= (bool)fire[0]; // fire variabile globale che in posizione 0 contine un flag che avvisa quando il giocatore preme spazio
+			id_missile[1]=fire[1];
+			id_missile2[1]=fire[1]+5;
 		pthread_mutex_unlock(&mutex_fire);
 		// se il giocatore preme spazio allora faccio partire i thread dei missili
 		if (flag){		
@@ -78,13 +75,13 @@ void* t_giocatore(void* arg)
 	bool flag;
 	char c; // contiene il caratte premuto da tastiera
 	// inizializzo il giocatore
-	giocatore.id = GAMER;
+	giocatore.id = generatorId();
 	giocatore.sprite = "<|--|>";
 	giocatore.dim=6;
 	giocatore.x = MAXX/2-giocatore.dim/2;
 	giocatore.y = MAXY-MINY;
 	giocatore.vite=3;
-	giocatore.id_thread = pthread_self();
+	giocatore.tipo=GAMER;
 	
 	
 	flag=false; 	
