@@ -33,12 +33,11 @@
 
 // indicano le tipologie di oggetti a schermo
 #define GAMER 1 // identifica la tipologia della navicella mossa dal giocatore
-#define MISSILE1 2
-#define MISSILE2 3
-#define BORDO 4
-#define ASTRONAVE1 5 // identifica l'astronave di lv1
-#define ASTRONAVE2 6 // identifica l'astronave di lv2
-#define BOMBA 7
+#define MISSILE 2
+#define BORDO 3
+#define ASTRONAVE1 4 // identifica l'astronave di lv1
+#define ASTRONAVE2 5 // identifica l'astronave di lv2
+#define BOMBA 6
 
 // dimensione buffer
 #define DIM_BUFFER 50
@@ -49,13 +48,14 @@ pthread_mutex_t mutex_scrn; // mutex per accesso alla risorsa condivisa screen
 pthread_mutex_t mutex_buffer; // mutex per l'accesso al buffer
 pthread_mutex_t mutex_collision; // mutex per l'accesso alla matrice per la gestione delle collisioni
 pthread_mutex_t mutex_fire; // mutex per l'accesso alla variabile utilizzata per quando si sprara
+pthread_mutex_t mutex_id; // mutex per l'accesso alla variabile utilizzata per la creazione degli id
 
 sem_t buffer_count; // semaforo per l'accesso al buffer
 
 // struttura che identifica un oggeto
 struct oggetto{
 	int id;
-	pthread_t id_thread;
+	int tipo;
 	char* sprite;
 	int dim;
 	int x;
@@ -74,6 +74,7 @@ int collision_m [OBJ_ON_SCREEN][2];
 
 int fire[2];// casin0000
 
+int newId;//varibile per generare gli id degli oggetti in gioco
 bool end_player;	//astronave del giocatore distrutta
 bool end_enemis;	//le astronavi nemiche sono tutte distrutte
 bool end_layer;		//le astronavi nemiche sono arrivate all'ultimo layer e vincono
