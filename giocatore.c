@@ -50,7 +50,6 @@ void* t_lanciatore_missili(void* arg){
 	int* id_missile2 = (int *) malloc(sizeof(int));
 	*id_missile2 = MISSILE2;
 	
-	
 	while(1){
 		pthread_mutex_lock(&mutex_fire);
 			flag= (bool)fire[0]; // fire variabile globale che in posizione 0 contine un flag che avvisa quando il giocatore preme spazio
@@ -135,8 +134,8 @@ void* t_giocatore(void* arg)
 
 		
 	}
-	
-	//Se esce dal ciclo vuol dire che il giocatore ha finito le vite quindi ha perso
+
+	//Se esce dal ciclo vuol dire che il giocatore ha finito le vite, quindi perde.
 	end_player = true;
 }
 

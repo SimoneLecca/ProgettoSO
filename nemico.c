@@ -116,7 +116,7 @@ void* t_astronave1 (void* arg){
 ;
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV1*/
 	struct oggetto astronave; // contiene i dati del giocatore
-	astronave.id = ASTRONAVE1; //*(int *)arg;
+	astronave.id = *(int *)arg;
 	astronave.sprite = "<@>";
 	astronave.dim=3;
 	astronave.x = MINX;
@@ -140,6 +140,7 @@ void* t_astronave1 (void* arg){
 				aggiungi_job(astronave);
 
 				pthread_create(&astronaveLV2, NULL, &t_astronave2, &astronave); 
+
 			}	
 		}
 		pthread_mutex_unlock(&mutex_collision);
@@ -164,6 +165,8 @@ void* t_astronave1 (void* arg){
 		}
 		usleep(DELAY);
 	}
+
+	pthread_join (astronaveLV2, NULL);
 	return NULL;
 }
 
@@ -173,15 +176,28 @@ void* t_astronave1 (void* arg){
 ------------------------------------------------------------------------------------------
 */ 
 void* t_generatore_astronavi(void* arg){
-	int m = 1; //*(int *)arg;
+	int m = 4; //*(int *)arg;
 	int count = 0;
+
 	pthread_t astronave[m]; 
-	
+	int* id_astronavi;
+
 	while(count < m) {
-		if(pthread_create(&astronave[count], NULL, t_astronave1, NULL)){ endwin(); exit;}
+		id_astronavi= (int *) malloc(sizeof(int));
+		*id_astronavi = count +10;
+		if(pthread_create(&astronave[count], NULL, t_astronave1, id_astronavi)){ endwin(); exit;}		
+
 		count++;
 		usleep(DELAY_ASTRONAVI);
 	}
+
+	
+	count = 0;
+	while(count < m) {
+		pthread_join (astronave[count], NULL);
+		count++;
+	}
+	end_enemis = true;
 }
 
 

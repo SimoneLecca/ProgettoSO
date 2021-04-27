@@ -29,7 +29,7 @@
 // delay
 #define COUNTDOWN_DELAY 1 // delay durante il countdown nella schermata iniziale
 #define DELAY 50000 // delay dei processi/thread
-#define DELAY_ASTRONAVI 500000 //delay tra un'astronave nemica e l'altra
+#define DELAY_ASTRONAVI 1000000 //delay tra un'astronave nemica e l'altra
 
 // indicano le tipologie di oggetti a schermo
 #define GAMER 1 // identifica la tipologia della navicella mossa dal giocatore

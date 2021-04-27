@@ -87,7 +87,7 @@ void controllore(){
 	struct oggetto all_obj[OBJ_ON_SCREEN];	// contiene tutti gli oggetti attivi nello schermo
 
 	//Finche non si verifica una condizione di fine parta continua
-	while(!(end_player && end_enemis && end_layer)){
+	while(!(end_player || end_enemis || end_layer)){
 		new_obj = (struct oggetto)elimina(); // prendo un oggetto dal buffer
 		old_obj = all_obj[new_obj.id];
 		all_obj[new_obj.id]=new_obj;
@@ -118,4 +118,103 @@ void controllore(){
 }
 
 void end_game(){
+	int x=0,y=0; // x y ci aiuteranno a stampare a video nelle cordinate giuste
+	int i=0; // contatore
+	int n_mostri=5; // numero di sprite dentro la prima schermata
+	int dir=1;
+	char c;
+
+	/*inizializzo i colori*/
+	start_color();
+	init_color(COLOR_MAGENTA, 700,300,0); // il magenta lo facccio diventare arancione
+	init_pair(1,COLOR_RED,COLOR_RED);  // al numero uno abbiamo rosso su sfondo rosso
+	init_pair(2,COLOR_MAGENTA,COLOR_MAGENTA); 
+	init_pair(3,COLOR_YELLOW,COLOR_YELLOW);
+	init_pair(4,COLOR_GREEN,COLOR_GREEN);
+	init_pair(5,COLOR_BLUE,COLOR_BLUE);
+	init_pair(6,COLOR_WHITE,COLOR_BLACK);
+	
+	x=27; // punto di inizio in ascissa degli sprite
+	y=5; // punto di inizio in cordinata degli sprite
+
+	clear();
+	print_box(); // richiamo la funzione di stampa bordo
+	
+	/*ciclo utilizzato per la stampa degli sprite*/
+	for(i=0;i<n_mostri+1;i++){
+		attron(COLOR_PAIR(i)); //funzioneche cambia il colore della prossima scritta
+		
+		mvprintw(y,x+2," "); 
+		mvprintw(y,x+3," "); 
+		mvprintw(y,x+4," "); 
+
+		mvprintw(y+1,x+1," "); 
+		mvprintw(y+1,x+2," "); 
+		mvprintw(y+1,x+3," "); 
+		mvprintw(y+1,x+4," "); 
+		mvprintw(y+1,x+5," "); 
+
+		mvprintw(y+2,x+0," "); 
+		mvprintw(y+2,x+1," "); 
+		mvprintw(y+2,x+3," "); 
+		mvprintw(y+2,x+5," "); 
+		mvprintw(y+2,x+6," "); 
+
+		mvprintw(y+3,x+0," "); 
+		mvprintw(y+3,x+1," "); 
+		mvprintw(y+3,x+2," "); 
+		mvprintw(y+3,x+3," "); 
+		mvprintw(y+3,x+4," "); 
+		mvprintw(y+3,x+5," "); 
+		mvprintw(y+3,x+6," "); 
+
+
+		mvprintw(y+4,x+2," "); 
+		mvprintw(y+4,x+4," "); 
+
+		mvprintw(y+5,x+1," "); 
+		mvprintw(y+5,x+3," "); 
+		mvprintw(y+5,x+5," "); 
+
+		mvprintw(y+6,x+0," "); 
+		mvprintw(y+6,x+6," "); 
+
+		attroff(i);
+		x+=16;
+	}
+	
+	attron(COLOR_PAIR(6));
+	
+	if(end_player || end_layer){
+		/*altra stampa nella home*/
+		mvprintw(20,50,"  ____                         ___                 ");
+		mvprintw(21,50," / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __ ");
+		mvprintw(22,50,"| |  _ / _` | '_ ` _ \\ / _ \\ | | | \\ \\ / / _ \\ '__|");
+		mvprintw(23,50,"| |_| | (_| | | | | | |  __/ | |_| |\\ V /  __/ |   ");
+		mvprintw(24,50," \\____|\\__,_|_| |_| |_|\\___|  \\___/  \\_/ \\___|_|   ");
+		mvprintw(25,50,"        Press 'SPACE' for close the game                ");
+	}
+	else{
+		/*altra stampa nella home*/
+		mvprintw(20,50,"__   __           __        ___       ");
+		mvprintw(21,50,"\\ \\ / /__  _   _  \\ \\      / (_)_ __  ");
+		mvprintw(22,50," \\ V / _ \\| | | |  \\ \\ /\\ / /| | '_ \\ ");
+		mvprintw(23,50,"  | | (_) | |_| |   \\ V  V / | | | | |");
+		mvprintw(24,50,"  |_|\\___/ \\__,_|    \\_/\\_/  |_|_| |_|");
+		mvprintw(25,50,"        Press 'SPACE' for close the game                ");
+	}
+
+	curs_set(0);
+	refresh();
+
+	// appena il giocatore preme un tasto finisce il gioco
+        c = getch();     
+	while(SPACE != getch());
+
+   	
+   	clear();
+	curs_set(0);
+	refresh();
+   	print_box();
 }
+
