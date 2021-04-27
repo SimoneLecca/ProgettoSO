@@ -12,6 +12,10 @@ void start(){
 	int counter=0; // contatore per il buffer
 
 	int fire[2]= {0,0};// casin0000
+
+	end_player= false;	//astronave del giocatore distrutta
+	end_enemis= false;	//le astronavi nemiche sono tutte distrutte
+	end_layer= false;	//le astronavi nemiche sono arrivate all'ultimo layer e vincono	
 }
 
 /*inizializza il semaforo*/

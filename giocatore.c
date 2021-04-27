@@ -135,6 +135,9 @@ void* t_giocatore(void* arg)
 
 		
 	}
+	
+	//Se esce dal ciclo vuol dire che il giocatore ha finito le vite quindi ha perso
+	end_player = true;
 }
 
 

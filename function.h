@@ -5,6 +5,8 @@ void print_box(); // stampa il bordo
 
 void inizializza_coda(); // inizalizza il semaforo 
 
+void end_game(); // stampa il bordo
+
 void controllore(); // legge dal buffer, stampa a video, controlla le collisioni
 
 void* t_giocatore(void* arg); // thread che si occupa dell aggiornamendo delle cordinate della navicella del giocatore

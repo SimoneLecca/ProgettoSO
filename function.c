@@ -1,6 +1,7 @@
 #include "function.h"
 #include "define.h"
 
+
 /*aggiunge un nuova posizine nel buffer*/
 void aggiungi_job (struct oggetto new_obj){
 	pthread_mutex_lock(&mutex_buffer); /* Blocco mutex */
@@ -85,7 +86,8 @@ void controllore(){
 	struct oggetto old_obj; 		// contiene la precedente posizione dell'oggetto che viene tolto dal buffer
 	struct oggetto all_obj[OBJ_ON_SCREEN];	// contiene tutti gli oggetti attivi nello schermo
 
-	while(1){
+	//Finche non si verifica una condizione di fine parta continua
+	while(!(end_player && end_enemis && end_layer)){
 		new_obj = (struct oggetto)elimina(); // prendo un oggetto dal buffer
 		old_obj = all_obj[new_obj.id];
 		all_obj[new_obj.id]=new_obj;
@@ -113,4 +115,7 @@ void controllore(){
 		
 		pthread_mutex_unlock(&mutex_collision);
 	}
+}
+
+void end_game(){
 }

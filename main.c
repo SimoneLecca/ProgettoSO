@@ -26,6 +26,8 @@ int main(){
 
 	controllore(); // si occupa di: leggere dal buffer, stampare a video gli oggetti in gioco, controllare le collisioni
 
+	end_game(); // stampa la fine della partita
+
 	endwin();
 	return 0;
 }
