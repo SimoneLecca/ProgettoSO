@@ -42,12 +42,13 @@
 // dimensione buffer
 #define DIM_BUFFER 50
 
-#define OBJ_ON_SCREEN 8 // NUMERO OGGETTI MASSIMI A SCERMO
+#define OBJ_ON_SCREEN 50 // NUMERO OGGETTI MASSIMI A SCERMO
 
 pthread_mutex_t mutex_scrn; // mutex per accesso alla risorsa condivisa screen
 pthread_mutex_t mutex_buffer; // mutex per l'accesso al buffer
 pthread_mutex_t mutex_collision; // mutex per l'accesso alla matrice per la gestione delle collisioni
 pthread_mutex_t mutex_fire; // mutex per l'accesso alla variabile utilizzata per quando si sprara
+pthread_mutex_t mutex_boom; // mutex per l'accesso alla variabile utilizzata per il lancio di bombe
 pthread_mutex_t mutex_id; // mutex per l'accesso alla variabile utilizzata per la creazione degli id
 
 sem_t buffer_count; // semaforo per l'accesso al buffer
@@ -63,6 +64,12 @@ struct oggetto{
 	int vite;
 	
 };  
+
+struct Node {
+    pthread_t info;
+    struct Node *next;
+};
+
 void aggiungi_job (struct oggetto);
 void stampaOggetto(struct oggetto);
 void cancellaOggetto(struct oggetto, int);
@@ -73,6 +80,7 @@ struct oggetto buffer[DIM_BUFFER]; // BUFFER
 int collision_m [OBJ_ON_SCREEN][2];
 
 int fire[2];// casin0000
+int boom[3];// 0/1, x, y
 
 int newId;//varibile per generare gli id degli oggetti in gioco
 bool end_player;	//astronave del giocatore distrutta

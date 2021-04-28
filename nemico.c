@@ -8,16 +8,16 @@
 */ 
 
 void* t_bomba(void* arg){
-	struct oggetto astronave = *(struct oggetto*)arg;
-
+	//int* parBomba= (int *) malloc(sizeof(int)*4);
+	int* parBomba= (int *)arg;
 	struct oggetto bomba;
-	bomba.id = generatorId();
+	bomba.id = parBomba[2];
 	bomba.sprite = "*";
 	bomba.dim=1;
 	bomba.vite=1;
 	bomba.tipo=BOMBA;
-	bomba.x = astronave.x + (int)(astronave.dim/2);
-	bomba.y = astronave.y +1;
+	bomba.x = parBomba[0] + (int)(parBomba[3]/2);
+	bomba.y = parBomba[1] +1;
 
 
 	while(bomba.vite > 0){
@@ -48,18 +48,27 @@ void* t_bomba(void* arg){
 */ 
 
 void* t_astronave2 (void* arg){
+	//lista per i thread_id delle bombe
+	typedef struct Node t_node;
+	//Dichiarazione e inizializzazione a NULL di l
+    t_node *l = NULL;
+	t_node *new = NULL;
+	
 	pthread_t bomba;
+	int parBomba[4];
+	int id_bomba = generatorId();
 	/*recupero stronave LV1*/	
 	struct oggetto astronaveLV1 = *(struct oggetto*)arg;
 
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV2*/
 	struct oggetto astronave; // contiene i dati del giocatore
-	astronave.id = ASTRONAVE2; //*(int *)arg;
+	astronave.id = generatorId(); //*(int *)arg;
 	astronave.sprite = "oo";
 	astronave.dim=2;
 	astronave.x = astronaveLV1.x;
 	astronave.y = astronaveLV1.y;
 	astronave.vite=2;
+	astronave.tipo= ASTRONAVE2;
 
 	int countB = 1; 	/*contatore per bomba*/
 	int direction=1;    /* Spostamento orizzontale */
@@ -93,12 +102,33 @@ void* t_astronave2 (void* arg){
 		
 			//lancio una bomba ogni 50 cicli
 			if(countB % 50 == 0){
-				pthread_create(&bomba, NULL, &t_bomba, &astronave);
+				/*setto vettore da passare per la creazione di una bomba*/
+				parBomba[0]= astronave.x;
+				parBomba[1]= astronave.y;
+				parBomba[2]= id_bomba;
+				parBomba[3]= astronave.dim;
+	
+				pthread_create(&bomba, NULL, &t_bomba, parBomba);
+
+				//Allocazione di l nella memoria
+    			new = malloc(sizeof(t_node));
+    			//Assegnazione del campo info
+    			new->info = bomba;
+    			//Assegnamento del campo next a NULL
+    			new->next = l;
+				//l adesso rappresenta la testa della lista 
+        		l = new;
 			}
 			countB++;
 		}
 		usleep(DELAY);
 	}
+
+	while (l != NULL) {
+		pthread_join (l->info, NULL);
+        l = l->next;
+    }
+
 	return NULL;
 }
 
@@ -110,8 +140,16 @@ void* t_astronave2 (void* arg){
 */ 
 
 void* t_astronave1 (void* arg){
+	//lista per i thread_id delle bombe
+	typedef struct Node t_node;
+	//Dichiarazione e inizializzazione a NULL di l
+    t_node *l = NULL;
+	t_node *new = NULL;
+
 	pthread_t astronaveLV2;
 	pthread_t bomba;
+	int parBomba[4];
+	int id_bomba = generatorId();
 
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV1*/
 	struct oggetto astronave; // contiene i dati del giocatore
@@ -158,7 +196,30 @@ void* t_astronave1 (void* arg){
 
 			//lancio una bomba ogni 50 cicli
 			if(countB % 50 == 0){
-				pthread_create(&bomba, NULL, &t_bomba, &astronave);
+				/*setto vettore da passare per la creazione di una bomba*/
+				parBomba[0]= astronave.x;
+				parBomba[1]= astronave.y;
+				parBomba[2]= id_bomba;
+				parBomba[3]= astronave.dim;
+	
+				pthread_create(&bomba, NULL, &t_bomba, parBomba);
+	
+				/*
+				pthread_mutex_lock(&mutex_boom);
+				boom[0]= 1;// bool
+				boom[1]= astronave.x;
+				boom[2]= astronave.y;
+
+				pthread_mutex_unlock(&mutex_boom);*/
+
+				//Allocazione di l nella memoria
+    			new = malloc(sizeof(t_node));
+    			//Assegnazione del campo info
+    			new->info = bomba;
+    			//Assegnamento del campo next a NULL
+    			new->next = l;
+				//l adesso rappresenta la testa della lista 
+        		l = new;
 			}
 			countB++;
 		}
@@ -166,6 +227,12 @@ void* t_astronave1 (void* arg){
 	}
 
 	pthread_join (astronaveLV2, NULL);
+	
+	while (l != NULL) {
+		pthread_join (l->info, NULL);
+        l = l->next;
+    }
+
 	return NULL;
 }
 
@@ -199,7 +266,40 @@ void* t_generatore_astronavi(void* arg){
 	end_enemis = true;
 }
 
+/*------------------------------------------------------------------------------------------
+ THREAD LANCIATORE BOMBE - ogni astronave nemica ne ha uno
+------------------------------------------------------------------------------------------*/ 
+/*
+void* t_lanciatore_bomba(void* arg){
+	pthread_t bomba; // id thread dei missili
+	bool flag=false; // flag generico
+	int* id_missile = (int *) malloc(sizeof(int)*2);
+	id_missile[0] = generatorId();
+	int* id_missile2 = (int *) malloc(sizeof(int)*2);
+	id_missile2[0] = generatorId();
+	
+	while(1){
+		pthread_mutex_lock(&mutex_fire);
+			flag= (bool)fire[0]; // fire variabile globale che in posizione 0 contine un flag che avvisa quando il giocatore preme spazio
+			id_missile[1]=fire[1];
+			id_missile2[1]=fire[1]+5;
+		pthread_mutex_unlock(&mutex_fire);
+		// se il giocatore preme spazio allora faccio partire i thread dei missili
+		if (flag){		
 
+		pthread_create(&missile1, NULL, &t_missile, id_missile); 
+		pthread_create(&missile2, NULL, &t_missile, id_missile2); 
+		
+		pthread_join (missile1, NULL);
+		pthread_join (missile2, NULL);		
+		pthread_mutex_lock(&mutex_fire);
+			fire[0]= 0; // aggiorno il flag 
+		pthread_mutex_unlock(&mutex_fire);	
+		}
+	}
+	free(id_missile);/// liberare memoria della malloc
+	free(id_missile2);
+}*/
 
 
 
