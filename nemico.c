@@ -8,7 +8,6 @@
 */ 
 
 void* t_bomba(void* arg){
-	//int* parBomba= (int *) malloc(sizeof(int)*4);
 	int* parBomba= (int *)arg;
 	struct oggetto bomba;
 	bomba.id = parBomba[2];
@@ -48,10 +47,12 @@ void* t_bomba(void* arg){
 */ 
 
 void* t_astronave2 (void* arg){
+	int* parAstronave2= (int *)arg;
+	
 	//lista per i thread_id delle bombe
 	typedef struct Node t_node;
 	//Dichiarazione e inizializzazione a NULL di l
-    t_node *l = NULL;
+    	t_node *l = NULL;
 	t_node *new = NULL;
 	
 	pthread_t bomba;
@@ -65,13 +66,15 @@ void* t_astronave2 (void* arg){
 	astronave.id = generatorId(); //*(int *)arg;
 	astronave.sprite = "oo";
 	astronave.dim=2;
-	astronave.x = astronaveLV1.x;
-	astronave.y = astronaveLV1.y;
+	astronave.x = parAstronave2[0];
+	astronave.y = parAstronave2[1];
 	astronave.vite=2;
 	astronave.tipo= ASTRONAVE2;
-
+	int direction=parAstronave2[2];    /* Spostamento orizzontale */
+	
+	srand((int)time(0)); 	//inizializza generatore numeri casuali
 	int countB = 1; 	/*contatore per bomba*/
-	int direction=1;    /* Spostamento orizzontale */
+	int r;			//ver per numero random, 0 o 1
 	
 	while(astronave.vite > 0){
 		/*Controllo se l'astronave ha Colliso*/
@@ -100,7 +103,9 @@ void* t_astronave2 (void* arg){
 			}
 			aggiungi_job(astronave);
 		
-			//lancio una bomba ogni 50 cicli
+			//lancio una bomba in un intervallo tra i 50 e i 100 cicli
+			r = random()%2;
+			countB += r; //al contatore aggiungo randomicamente un +1
 			if(countB % 50 == 0){
 				/*setto vettore da passare per la creazione di una bomba*/
 				parBomba[0]= astronave.x;
@@ -111,13 +116,13 @@ void* t_astronave2 (void* arg){
 				pthread_create(&bomba, NULL, &t_bomba, parBomba);
 
 				//Allocazione di l nella memoria
-    			new = malloc(sizeof(t_node));
-    			//Assegnazione del campo info
-    			new->info = bomba;
-    			//Assegnamento del campo next a NULL
-    			new->next = l;
+    				new = malloc(sizeof(t_node));
+    				//Assegnazione del campo info
+	    			new->info = bomba;
+	    			//Assegnamento del campo next a NULL
+	    			new->next = l;
 				//l adesso rappresenta la testa della lista 
-        		l = new;
+	        		l = new;
 			}
 			countB++;
 		}
@@ -143,12 +148,15 @@ void* t_astronave1 (void* arg){
 	//lista per i thread_id delle bombe
 	typedef struct Node t_node;
 	//Dichiarazione e inizializzazione a NULL di l
-    t_node *l = NULL;
+    	t_node *l = NULL;
 	t_node *new = NULL;
 
 	pthread_t astronaveLV2;
 	pthread_t bomba;
-	int parBomba[4];
+
+	int parBomba[4];	//parametro da passare alla bomba
+	int parAstronave2[3]; 	//parametro da passare al'astronave di lv2
+
 	int id_bomba = generatorId();
 
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV1*/
@@ -161,8 +169,11 @@ void* t_astronave1 (void* arg){
 	astronave.tipo= ASTRONAVE1;
 	astronave.vite=1;
 	
-	int countB = 1; 	/*contatore per bomba*/
 	int direction=1;    /* Spostamento orizzontale */
+	
+	srand((int)time(0)); 	//inizializza generatore numeri casuali
+	int countB = 1; 	/*contatore per bomba*/
+	int r;			//ver per numero random, 0 o 1
 	
 	while(astronave.vite > 0){		
 		/*Controllo se l'astronave ha Colliso*/
@@ -175,8 +186,12 @@ void* t_astronave1 (void* arg){
 				astronave.vite--;
 				beep();
 				aggiungi_job(astronave);
-
-				pthread_create(&astronaveLV2, NULL, &t_astronave2, &astronave); 
+				/*setto vettore da passare per la creazione di una bomba*/
+				parAstronave2[0] = astronave.x;
+				parAstronave2[1] = astronave.y;
+				parAstronave2[2] = direction;
+				
+				pthread_create(&astronaveLV2, NULL, &t_astronave2, parAstronave2); 
 
 			}	
 		}
@@ -194,8 +209,10 @@ void* t_astronave1 (void* arg){
 			}
 			aggiungi_job(astronave);
 
-			//lancio una bomba ogni 50 cicli
-			if(countB % 50 == 0){
+			//lancio una bomba in un intervallo tra i 50 e i 100 cicli
+			r = random()%2;
+			countB += r; //al contatore aggiungo randomicamente un +1
+			if(countB % 100 == 0){
 				/*setto vettore da passare per la creazione di una bomba*/
 				parBomba[0]= astronave.x;
 				parBomba[1]= astronave.y;
@@ -204,22 +221,15 @@ void* t_astronave1 (void* arg){
 	
 				pthread_create(&bomba, NULL, &t_bomba, parBomba);
 	
-				/*
-				pthread_mutex_lock(&mutex_boom);
-				boom[0]= 1;// bool
-				boom[1]= astronave.x;
-				boom[2]= astronave.y;
-
-				pthread_mutex_unlock(&mutex_boom);*/
 
 				//Allocazione di l nella memoria
-    			new = malloc(sizeof(t_node));
-    			//Assegnazione del campo info
-    			new->info = bomba;
-    			//Assegnamento del campo next a NULL
-    			new->next = l;
+    				new = malloc(sizeof(t_node));
+    				//Assegnazione del campo info
+    				new->info = bomba;
+    				//Assegnamento del campo next a NULL
+    				new->next = l;
 				//l adesso rappresenta la testa della lista 
-        		l = new;
+        			l = new;
 			}
 			countB++;
 		}
@@ -242,13 +252,12 @@ void* t_astronave1 (void* arg){
 ------------------------------------------------------------------------------------------
 */ 
 void* t_generatore_astronavi(void* arg){
-	int m = 4; //*(int *)arg;
 	int count = 0;
 
-	pthread_t astronave[m]; 
+	pthread_t astronave[N_ASTONAVI_NEMICHE]; 
 	int* id_astronavi;
 
-	while(count < m) {
+	while(count < N_ASTONAVI_NEMICHE) {
 		id_astronavi= (int *) malloc(sizeof(int));
 		*id_astronavi = count +10;
 		if(pthread_create(&astronave[count], NULL, t_astronave1, id_astronavi)){ endwin(); exit;}		
@@ -259,7 +268,7 @@ void* t_generatore_astronavi(void* arg){
 
 	
 	count = 0;
-	while(count < m) {
+	while(count < N_ASTONAVI_NEMICHE) {
 		pthread_join (astronave[count], NULL);
 		count++;
 	}
