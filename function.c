@@ -48,7 +48,10 @@ struct oggetto elimina(){
 /*AGGIORNO POSIZIONE OGGETTO*/
 void stampaOggetto(struct oggetto new_obj){
 		pthread_mutex_lock(&mutex_scrn); // blocco mutex per lo schermo		
-		mvprintw(new_obj.y,new_obj.x,new_obj.sprite);
+		mvprintw(new_obj.y,new_obj.x,new_obj.sprite[0]);
+		if(new_obj.dimy==2){//dimy
+			mvprintw(new_obj.y+1,new_obj.x,new_obj.sprite[1]);
+		}
 		curs_set(0);
 		refresh();
 		pthread_mutex_unlock(&mutex_scrn);// sblocco mutex  per lo schermo
@@ -56,7 +59,10 @@ void stampaOggetto(struct oggetto new_obj){
 void cancellaOggetto(struct oggetto old_obj, int dim){												// contatore			
 		pthread_mutex_lock(&mutex_scrn); // blocco mutex per lo schermo		
 		for(int i=0; i < dim;i++){
-			mvprintw(old_obj.y,old_obj.x+i," ");		
+			mvprintw(old_obj.y,old_obj.x+i," ");	
+			if(old_obj.dimy==2){//dimy
+			mvprintw(old_obj.y+1,old_obj.x+i," ");
+			}	
 			curs_set(0);
 			refresh();
 		}
@@ -71,11 +77,17 @@ int isColliding(struct oggetto obj, struct oggetto all_obj[]){
 			/*CONTROLLO SE C'E UNA COLLISIONE*/
 			/*controllo se il punto iniziale e compreso tra x e x+dim*/
 			/*controllo se il punto finale e compreso tra x e x+dim*/								
-			if( ((all_obj[i].x >= obj.x && all_obj[i].x <= obj.x + obj.dim) 
-			|| (all_obj[i].x+all_obj[i].dim >= obj.x && all_obj[i].x+all_obj[i].dim<= obj.x + obj.dim)) 
-			&& obj.y == all_obj[i].y){
-				/*COLLISIONE RILEVATA*/
-				return all_obj[i].tipo;
+			if( ((all_obj[i].x >= obj.x && all_obj[i].x <= obj.x + obj.dim -1) 
+			|| (all_obj[i].x+all_obj[i].dim -1 >= obj.x && all_obj[i].x+all_obj[i].dim -1<= obj.x + obj.dim -1))){//&& obj.y == all_obj[i].y
+				/*controlla dimy*/
+				if( ((all_obj[i].y >= obj.y && all_obj[i].y <= obj.y + obj.dimy -1) 
+				|| (all_obj[i].y+all_obj[i].dimy -1 >= obj.y && all_obj[i].y+all_obj[i].dimy -1<= obj.y + obj.dimy -1))){
+					
+					/*COLLISIONE RILEVATA*/
+					return all_obj[i].tipo;
+				}
+				
+				
 			}
 		}
 	}

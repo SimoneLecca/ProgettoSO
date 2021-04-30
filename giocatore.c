@@ -9,8 +9,9 @@ void* t_missile(void* arg){
 	int* param = arg;
 	missile.id = param[0];
 	missile.tipo=MISSILE;
-	missile.sprite = "|";
+	missile.sprite[0] = "|";
 	missile.dim=1;
+	missile.dimy=1;
 	missile.x = param[1];
 	missile.y = MAXY-MINY-1;
 	missile.vite=1;
@@ -76,8 +77,9 @@ void* t_giocatore(void* arg)
 	char c; // contiene il caratte premuto da tastiera
 	// inizializzo il giocatore
 	giocatore.id = generatorId();
-	giocatore.sprite = "<|--|>";
+	giocatore.sprite[0] = "<|--|>";
 	giocatore.dim=6;
+	giocatore.dimy=1;
 	giocatore.x = MAXX/2-giocatore.dim/2;
 	giocatore.y = MAXY-MINY;
 	giocatore.vite=3;
@@ -119,7 +121,6 @@ void* t_giocatore(void* arg)
 				fire[1]= giocatore.x;
 			}
 			pthread_mutex_unlock(&mutex_fire);
-			break;
 		
 		default:
 			flag=true;

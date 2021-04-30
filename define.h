@@ -39,8 +39,8 @@
 #define BOMBA 6
 
 //NEMICI
-#define N_ASTONAVI_NEMICHE 6	//n di astronavi nemiche totali
-#define DELAY_ASTRONAVI 1500000 //delay tra un'astronave nemica e l'altra
+#define N_ASTONAVI_NEMICHE 10	//n di astronavi nemiche totali
+#define DELAY_ASTRONAVI 2000000 //delay tra un'astronave nemica e l'altra
 
 // dimensione buffer
 #define DIM_BUFFER 50
@@ -60,8 +60,9 @@ sem_t buffer_count; // semaforo per l'accesso al buffer
 struct oggetto{
 	int id;
 	int tipo;
-	char* sprite;
+	char* sprite[2];
 	int dim;
+	int dimy;
 	int x;
 	int y;
 	int vite;

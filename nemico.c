@@ -11,8 +11,9 @@ void* t_bomba(void* arg){
 	int* parBomba= (int *)arg;
 	struct oggetto bomba;
 	bomba.id = parBomba[2];
-	bomba.sprite = "*";
+	bomba.sprite[0] = "*";
 	bomba.dim=1;
+	bomba.dimy=1;
 	bomba.vite=1;
 	bomba.tipo=BOMBA;
 	bomba.x = parBomba[0] + (int)(parBomba[3]/2);
@@ -39,7 +40,6 @@ void* t_bomba(void* arg){
 	return NULL;
 } 
 
-
 /*
 ------------------------------------------------------------------------------------------
  Funzione Astronave LV2 - simile missili e astronave madre
@@ -58,14 +58,14 @@ void* t_astronave2 (void* arg){
 	pthread_t bomba;
 	int parBomba[4];
 	int id_bomba = generatorId();
-	/*recupero stronave LV1*/	
-	struct oggetto astronaveLV1 = *(struct oggetto*)arg;
-
+	
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV2*/
 	struct oggetto astronave; // contiene i dati del giocatore
 	astronave.id = generatorId(); //*(int *)arg;
-	astronave.sprite = "oo";
+	astronave.sprite[0] = "00";
+	astronave.sprite[1] = "00";
 	astronave.dim=2;
+	astronave.dimy=2;
 	astronave.x = parAstronave2[0];
 	astronave.y = parAstronave2[1];
 	astronave.vite=2;
@@ -84,9 +84,15 @@ void* t_astronave2 (void* arg){
 
 			/*COLLISIONE CON MISSILE*/
 			if(collision_m[astronave.id][1]==MISSILE){
+				direction *= (-1);
 				astronave.vite--;
 				beep();
 				aggiungi_job(astronave);
+			}
+			
+			/*COLLISIONE CON ASTRONAVE*/
+			if(collision_m[astronave.id][1]==ASTRONAVE1 || collision_m[astronave.id][1]==ASTRONAVE2){
+				direction *= (-1);
 			}	
 		}
 		pthread_mutex_unlock(&mutex_collision);
@@ -96,7 +102,7 @@ void* t_astronave2 (void* arg){
 			//se' raggiunge il bordo cambia direzione e scende di y
 			if(astronave.x + direction == MAXX - astronave.dim || astronave.x + direction == MINX) {
 				direction = -direction;
-				astronave.y++;
+				astronave.y+=2;
 			}
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
@@ -162,8 +168,9 @@ void* t_astronave1 (void* arg){
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV1*/
 	struct oggetto astronave; // contiene i dati del giocatore
 	astronave.id = generatorId(); //*(int *)arg;
-	astronave.sprite = "<@>";
+	astronave.sprite[0] = "<@>";
 	astronave.dim=3;
+	astronave.dimy=1;
 	astronave.x = MINX;
 	astronave.y = MINY;
 	astronave.tipo= ASTRONAVE1;
@@ -183,6 +190,7 @@ void* t_astronave1 (void* arg){
 
 			/*COLLISIONE CON MISSILE*/
 			if(collision_m[astronave.id][1]==MISSILE){
+				direction *= (-1);
 				astronave.vite--;
 				beep();
 				aggiungi_job(astronave);
@@ -194,6 +202,11 @@ void* t_astronave1 (void* arg){
 				pthread_create(&astronaveLV2, NULL, &t_astronave2, parAstronave2); 
 
 			}	
+				
+			/*COLLISIONE CON ASTRONAVE*/
+			if(collision_m[astronave.id][1]==ASTRONAVE1 || collision_m[astronave.id][1]==ASTRONAVE2){
+				direction *= (-1);
+			}
 		}
 		pthread_mutex_unlock(&mutex_collision);
 
@@ -202,7 +215,7 @@ void* t_astronave1 (void* arg){
 			//se' raggiunge il bordo cambia direzione e scende di y
 			if(astronave.x + direction == MAXX - astronave.dim || astronave.x + direction == MINX) {
 				direction = -direction;
-				astronave.y++;
+				astronave.y+=2;
 			}
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
