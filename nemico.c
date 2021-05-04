@@ -58,6 +58,11 @@ void* t_astronave2 (void* arg){
 	pthread_t bomba;
 	int parBomba[4];
 	int id_bomba = generatorId();
+
+	int sxup=2; 	bool nav_sxup=true;
+	int sxdown=2; 	bool nav_sxdown=true;
+	int dxup=2;	bool nav_dxup=true;
+	int dxdown=2;	bool nav_dxdown=true;
 	
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV2*/
 	struct oggetto astronave; // contiene i dati del giocatore
@@ -68,7 +73,7 @@ void* t_astronave2 (void* arg){
 	astronave.dimy=2;
 	astronave.x = parAstronave2[0];
 	astronave.y = parAstronave2[1];
-	astronave.vite=2;
+	astronave.vite=8;
 	astronave.tipo= ASTRONAVE2;
 	int direction=parAstronave2[2];    /* Spostamento orizzontale */
 	
@@ -78,6 +83,7 @@ void* t_astronave2 (void* arg){
 	
 	while(astronave.vite > 0){
 		/*Controllo se l'astronave ha Colliso*/
+		
 		pthread_mutex_lock(&mutex_collision);
 		if(collision_m[astronave.id][0]==1){
 			collision_m[astronave.id][0]=0;
@@ -85,9 +91,58 @@ void* t_astronave2 (void* arg){
 			/*COLLISIONE CON MISSILE*/
 			if(collision_m[astronave.id][1]==MISSILE){
 				direction *= (-1);
-				astronave.vite--;
-				beep();
+				/*Inividuo la navicella colpita*/
+                                if(astronave.x == collision_m[astronave.id][2]){ //sxdown
+                                	if(astronave.y == collision_m[astronave.id][3]){ //sxup
+                                		if(sxup >0){
+                                			sxup--;
+                                			astronave.vite--;
+							beep();
+                                			if(sxup == 0) nav_sxup=false;
+                                		}
+                                	}
+                                	else{//sxdown
+                                		if(sxdown >0){
+                                			sxdown--;
+                                			astronave.vite--;
+							beep();
+                                			if(sxdown == 0) nav_sxdown=false;
+                                		}
+                                	}
+				}
+				else{//dx
+					if(astronave.y == collision_m[astronave.id][3]){ //dxup
+						if(dxup >0){
+                                			dxup--;
+                                			astronave.vite--;
+							beep();
+							if(dxup == 0) nav_dxup=false;
+                              				
+                                		}
+                                	}
+                                	else{//dxdown
+                                		if(dxdown >0){
+                                			dxdown--;
+                                			astronave.vite--;
+							beep();
+                                			if(dxdown == 0) nav_dxdown=false;
+                                		}
+                                	}		
+				}
+				if(!nav_sxup){
+					if(!nav_dxup) astronave.sprite[0]="^^";
+					else astronave.sprite[0]="^0";
+				}
+				else if(!nav_dxup) astronave.sprite[0]="0^";
+				if(!nav_sxdown){
+					if(!nav_dxdown) astronave.sprite[1]="^^";
+					else astronave.sprite[1]="^0";
+				}
+				else if(!nav_dxdown) astronave.sprite[1]="0^";
+				
 				aggiungi_job(astronave);
+			
+				
 			}
 			
 			/*COLLISIONE CON ASTRONAVE*/
@@ -96,7 +151,7 @@ void* t_astronave2 (void* arg){
 			}	
 		}
 		pthread_mutex_unlock(&mutex_collision);
-
+		
 		//Se la navicella e' ancora viva effettuo lo spostamento
 		if(astronave.vite>0){
 			//se' raggiunge il bordo cambia direzione e scende di y
@@ -107,6 +162,8 @@ void* t_astronave2 (void* arg){
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
 			}
+
+
 			aggiungi_job(astronave);
 		
 			//lancio una bomba in un intervallo tra i 50 e i 100 cicli
@@ -117,6 +174,7 @@ void* t_astronave2 (void* arg){
 				parBomba[0]= astronave.x;
 				parBomba[1]= astronave.y;
 				parBomba[2]= id_bomba;
+
 				parBomba[3]= astronave.dim;
 	
 				pthread_create(&bomba, NULL, &t_bomba, parBomba);
@@ -145,6 +203,17 @@ void* t_astronave2 (void* arg){
 
 /*----------------------------------------------------------------------------------------
 /*
+
+
+
+
+
+
+
+
+
+
+
 ------------------------------------------------------------------------------------------
  Funzione Astronave LV1 - simile missili e astronave madre
 ------------------------------------------------------------------------------------------
@@ -272,8 +341,8 @@ void* t_generatore_astronavi(void* arg){
 
 	while(count < N_ASTONAVI_NEMICHE) {
 		id_astronavi= (int *) malloc(sizeof(int));
-		*id_astronavi = count +10;
-		if(pthread_create(&astronave[count], NULL, t_astronave1, id_astronavi)){ endwin(); exit;}		
+		//*id_astronavi = count +10;
+		if(pthread_create(&astronave[count], NULL, t_astronave1, NULL)){ endwin(); exit;}		
 
 		count++;
 		usleep(DELAY_ASTRONAVI);

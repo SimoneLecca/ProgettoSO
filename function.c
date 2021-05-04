@@ -61,7 +61,7 @@ void cancellaOggetto(struct oggetto old_obj, int dim){												// contatore
 		for(int i=0; i < dim;i++){
 			mvprintw(old_obj.y,old_obj.x+i," ");	
 			if(old_obj.dimy==2){//dimy
-			mvprintw(old_obj.y+1,old_obj.x+i," ");
+				mvprintw(old_obj.y+1,old_obj.x+i," ");
 			}	
 			curs_set(0);
 			refresh();
@@ -76,15 +76,18 @@ int isColliding(struct oggetto obj, struct oggetto all_obj[]){
 		if(obj.id != all_obj[i].id && all_obj[i].vite >0){
 			/*CONTROLLO SE C'E UNA COLLISIONE*/
 			/*controllo se il punto iniziale e compreso tra x e x+dim*/
-			/*controllo se il punto finale e compreso tra x e x+dim*/								
-			if( ((all_obj[i].x >= obj.x && all_obj[i].x <= obj.x + obj.dim -1) 
-			|| (all_obj[i].x+all_obj[i].dim -1 >= obj.x && all_obj[i].x+all_obj[i].dim -1<= obj.x + obj.dim -1))){//&& obj.y == all_obj[i].y
+			/*controllo se il punto finale e compreso tra x e x+dim*/										
+			if( ((all_obj[i].x >= obj.x && all_obj[i].x <= obj.x + (obj.dim -1)) 
+			|| (all_obj[i].x+(all_obj[i].dim -1) >= obj.x && all_obj[i].x+(all_obj[i].dim-1)<= obj.x + (obj.dim -1)))){//&& obj.y == all_obj[i].y
 				/*controlla dimy*/
-				if( ((all_obj[i].y >= obj.y && all_obj[i].y <= obj.y + obj.dimy -1) 
-				|| (all_obj[i].y+all_obj[i].dimy -1 >= obj.y && all_obj[i].y+all_obj[i].dimy -1<= obj.y + obj.dimy -1))){
+				if( ((all_obj[i].y >= obj.y && all_obj[i].y <= obj.y + (obj.dimy-1)) 
+				|| (all_obj[i].y+(all_obj[i].dimy-1) >= obj.y && all_obj[i].y+ (all_obj[i].dimy -1) <= obj.y + (obj.dimy -1)))){
+					/**COLLISIONE RILEVATA*/
 					
-					/*COLLISIONE RILEVATA*/
+					collision_m [obj.id][2] =all_obj[i].x;	//x
+					collision_m [obj.id][3] =all_obj[i].y;	//y
 					return all_obj[i].tipo;
+					
 				}
 				
 				
@@ -129,8 +132,7 @@ void controllore(){
 			colliso = isColliding(new_obj, all_obj);
 			if(colliso != -1){ 
 				collision_m [new_obj.id][0]=1;
-				collision_m [new_obj.id][1]=colliso;
-				
+				collision_m [new_obj.id][1]=colliso;				
 			}
 		}
 		/*Se le vite sono 0 cancello l'oggetto dallo schermo*/

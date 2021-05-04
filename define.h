@@ -39,7 +39,7 @@
 #define BOMBA 6
 
 //NEMICI
-#define N_ASTONAVI_NEMICHE 10	//n di astronavi nemiche totali
+#define N_ASTONAVI_NEMICHE 5	//n di astronavi nemiche totali
 #define DELAY_ASTRONAVI 2000000 //delay tra un'astronave nemica e l'altra
 
 // dimensione buffer
