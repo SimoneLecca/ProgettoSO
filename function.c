@@ -104,6 +104,16 @@ int isColliding(struct oggetto obj, struct oggetto all_obj[]){
 	
 }
 
+void aggiornaPunteggio(int punt){
+	pthread_mutex_lock(&mutex_punteggio);
+	punteggio +=punt;
+	if(punteggio < 0) punteggio =0;
+	pthread_mutex_unlock(&mutex_punteggio);	
+	pthread_mutex_lock(&mutex_scrn);
+	mvprintw(MAXY +1, 2, "Punteggio: %d    ", punteggio); 
+	pthread_mutex_unlock(&mutex_scrn);
+}
+
 /*si occupa di: leggere dal buffer, stampare a video gli oggetti in gioco, controllare le collisioni */
 void controllore(){
 	int numero;

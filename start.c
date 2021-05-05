@@ -9,6 +9,9 @@ void start(){
 	pthread_mutex_t mutex_fire = PTHREAD_MUTEX_INITIALIZER; // mutex per l'accesso alla variabile utilizzata per quando si sprara
 	pthread_mutex_t mutex_astronave = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t mutex_id = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t mutex_punteggio = PTHREAD_MUTEX_INITIALIZER;
+
+	punteggio = 0;
 
 	int counter=0; // contatore per il buffer
 
@@ -168,5 +171,7 @@ void print_box(){
 	
 	mvvline(MAXY-1,1, ACS_LLCORNER, 1); // angolo BL
 	mvvline(MAXY-1, MAXX-1, ACS_LRCORNER, 1); // BR
+
+	aggiornaPunteggio(0);
    	refresh();
 }

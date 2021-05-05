@@ -53,6 +53,7 @@ pthread_mutex_t mutex_collision; // mutex per l'accesso alla matrice per la gest
 pthread_mutex_t mutex_fire; // mutex per l'accesso alla variabile utilizzata per quando si sprara
 pthread_mutex_t mutex_boom; // mutex per l'accesso alla variabile utilizzata per il lancio di bombe
 pthread_mutex_t mutex_id; // mutex per l'accesso alla variabile utilizzata per la creazione degli id
+pthread_mutex_t mutex_punteggio; // mutex per l'accesso alla variabile utilizzata per il lancio di bombe
 
 sem_t buffer_count; // semaforo per l'accesso al buffer
 
@@ -65,8 +66,7 @@ struct oggetto{
 	int dimy;
 	int x;
 	int y;
-	int vite;
-	
+	int vite;	
 };  
 
 struct Node {
@@ -79,6 +79,7 @@ void stampaOggetto(struct oggetto);
 void cancellaOggetto(struct oggetto, int);
 int isColliding(struct oggetto, struct oggetto[]);
 
+int punteggio;
 int counter; // contatore per il buffer
 struct oggetto buffer[DIM_BUFFER]; // BUFFER
 int collision_m [OBJ_ON_SCREEN][2];

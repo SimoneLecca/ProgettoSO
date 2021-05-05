@@ -9,6 +9,8 @@ void end_game(); // stampa il bordo
 
 void controllore(); // legge dal buffer, stampa a video, controlla le collisioni
 
+void aggiornaPunteggio(int punt);
+
 void* t_giocatore(void* arg); // thread che si occupa dell aggiornamendo delle cordinate della navicella del giocatore
 void* t_missile(void* arg); // thread che aggiorna le posizioni di un missile lanciato dal giocatore
 void* t_lanciatore_missili(void* arg);// lancia i missisili

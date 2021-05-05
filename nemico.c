@@ -59,10 +59,10 @@ void* t_astronave2 (void* arg){
 	int parBomba[4];
 	int id_bomba = generatorId();
 
-	int sxup=2; 	bool nav_sxup=true;
-	int sxdown=2; 	bool nav_sxdown=true;
-	int dxup=2;	bool nav_dxup=true;
-	int dxdown=2;	bool nav_dxdown=true;
+	int sxup=1; 	bool nav_sxup=true;
+	int sxdown=1; 	bool nav_sxdown=true;
+	int dxup=1;	bool nav_dxup=true;
+	int dxdown=1;	bool nav_dxdown=true;
 	
 	/*INIZIALIZZAZIONE ASTRONAVE DI LV2*/
 	struct oggetto astronave; // contiene i dati del giocatore
@@ -73,7 +73,7 @@ void* t_astronave2 (void* arg){
 	astronave.dimy=2;
 	astronave.x = parAstronave2[0];
 	astronave.y = parAstronave2[1];
-	astronave.vite=8;
+	astronave.vite=sxup+sxdown+dxup+dxdown;
 	astronave.tipo= ASTRONAVE2;
 	int direction=parAstronave2[2];    /* Spostamento orizzontale */
 	
@@ -96,6 +96,7 @@ void* t_astronave2 (void* arg){
                                 	if(astronave.y == collision_m[astronave.id][3]){ //sxup
                                 		if(sxup >0){
                                 			sxup--;
+                                			aggiornaPunteggio(5);
                                 			astronave.vite--;
 							beep();
                                 			if(sxup == 0) nav_sxup=false;
@@ -104,9 +105,16 @@ void* t_astronave2 (void* arg){
                                 	else{//sxdown
                                 		if(sxdown >0){
                                 			sxdown--;
+							aggiornaPunteggio(5);
                                 			astronave.vite--;
 							beep();
-                                			if(sxdown == 0) nav_sxdown=false;
+                                			if(sxdown == 0) {
+                                				//se viene distrutta una navicella di sotto viene sostituita da quella sopra
+                                				//nav_sxdown=false;
+                                				nav_sxdown=nav_sxup;
+                                				nav_sxup=false;
+                                				sxdown = sxup; 
+                                			}
                                 		}
                                 	}
 				}
@@ -114,6 +122,7 @@ void* t_astronave2 (void* arg){
 					if(astronave.y == collision_m[astronave.id][3]){ //dxup
 						if(dxup >0){
                                 			dxup--;
+                                			aggiornaPunteggio(5);
                                 			astronave.vite--;
 							beep();
 							if(dxup == 0) nav_dxup=false;
@@ -123,9 +132,17 @@ void* t_astronave2 (void* arg){
                                 	else{//dxdown
                                 		if(dxdown >0){
                                 			dxdown--;
+                                			aggiornaPunteggio(5);
                                 			astronave.vite--;
 							beep();
-                                			if(dxdown == 0) nav_dxdown=false;
+                                			if(dxdown == 0) {
+                                				//se viene distrutta una navicella di sotto viene sostituita da quella sopra
+                                				//nav_sxdown=false;
+                                				nav_dxdown=nav_dxup;
+                                				nav_dxup=false;
+                                				dxdown = dxup; 
+                       
+                                			}
                                 		}
                                 	}		
 				}
@@ -192,6 +209,30 @@ void* t_astronave2 (void* arg){
 		}
 		usleep(DELAY);
 	}
+	
+	//navicella distrutta Animazione
+	astronave.vite=1;
+	astronave.sprite[0]="**";
+	astronave.sprite[1]="**";
+	aggiungi_job(astronave);
+	usleep(DELAY*3);
+	astronave.sprite[0]="~~";
+	astronave.sprite[1]="~~";
+	aggiungi_job(astronave);
+	usleep(DELAY*3);
+	astronave.vite=1;
+	astronave.sprite[0]="**";
+	astronave.sprite[1]="**";
+	aggiungi_job(astronave);
+	usleep(DELAY*3);
+	astronave.sprite[0]="~~";
+	astronave.sprite[1]="~~";
+	aggiungi_job(astronave);
+	usleep(DELAY*3);
+	astronave.vite=0;
+	aggiungi_job(astronave);
+	
+	aggiornaPunteggio(40);
 
 	while (l != NULL) {
 		pthread_join (l->info, NULL);
@@ -267,6 +308,8 @@ void* t_astronave1 (void* arg){
 				parAstronave2[0] = astronave.x;
 				parAstronave2[1] = astronave.y;
 				parAstronave2[2] = direction;
+
+				aggiornaPunteggio(20);
 				
 				pthread_create(&astronaveLV2, NULL, &t_astronave2, parAstronave2); 
 
@@ -318,6 +361,7 @@ void* t_astronave1 (void* arg){
 		usleep(DELAY);
 	}
 
+	
 	pthread_join (astronaveLV2, NULL);
 	
 	while (l != NULL) {

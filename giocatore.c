@@ -96,6 +96,7 @@ void* t_giocatore(void* arg)
 		if(collision_m[giocatore.id][0]==1 && collision_m[giocatore.id][1]==BOMBA){
 			collision_m[giocatore.id][0]=0;
 			giocatore.vite--; flash(); beep();
+			aggiornaPunteggio(-20);
 		}
 		pthread_mutex_unlock(&mutex_collision);
 
