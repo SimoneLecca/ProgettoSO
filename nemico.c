@@ -10,7 +10,7 @@
 void* t_bomba(void* arg){
 	int* parBomba= (int *)arg;
 	struct oggetto bomba;
-	bomba.id = parBomba[2];
+	bomba.id = parBomba[2];//generatorId();
 	bomba.sprite[0] = "*";
 	bomba.dim=1;
 	bomba.dimy=1;
@@ -98,7 +98,7 @@ void* t_astronave2 (void* arg){
                                 			sxup--;
                                 			aggiornaPunteggio(5);
                                 			astronave.vite--;
-							beep();
+							//beep();
                                 			if(sxup == 0) nav_sxup=false;
                                 		}
                                 	}
@@ -107,7 +107,7 @@ void* t_astronave2 (void* arg){
                                 			sxdown--;
 							aggiornaPunteggio(5);
                                 			astronave.vite--;
-							beep();
+							//beep();
                                 			if(sxdown == 0) {
                                 				//se viene distrutta una navicella di sotto viene sostituita da quella sopra
                                 				//nav_sxdown=false;
@@ -124,7 +124,7 @@ void* t_astronave2 (void* arg){
                                 			dxup--;
                                 			aggiornaPunteggio(5);
                                 			astronave.vite--;
-							beep();
+							//beep();
 							if(dxup == 0) nav_dxup=false;
                               				
                                 		}
@@ -134,7 +134,7 @@ void* t_astronave2 (void* arg){
                                 			dxdown--;
                                 			aggiornaPunteggio(5);
                                 			astronave.vite--;
-							beep();
+							//beep();
                                 			if(dxdown == 0) {
                                 				//se viene distrutta una navicella di sotto viene sostituita da quella sopra
                                 				//nav_sxdown=false;
@@ -175,6 +175,7 @@ void* t_astronave2 (void* arg){
 			if(astronave.x + direction == MAXX - astronave.dim || astronave.x + direction == MINX) {
 				direction = -direction;
 				astronave.y+=2;
+				if(astronave.y >= MAXY -2) end_layer=true;
 			}
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
@@ -282,7 +283,7 @@ void* t_astronave1 (void* arg){
 	astronave.dim=3;
 	astronave.dimy=1;
 	astronave.x = MINX;
-	astronave.y = MINY;
+	astronave.y = MINY+10;
 	astronave.tipo= ASTRONAVE1;
 	astronave.vite=1;
 	
@@ -297,12 +298,12 @@ void* t_astronave1 (void* arg){
 		pthread_mutex_lock(&mutex_collision);
 		if(collision_m[astronave.id][0]==1){
 			collision_m[astronave.id][0]=0;
-
+			
 			/*COLLISIONE CON MISSILE*/
 			if(collision_m[astronave.id][1]==MISSILE){
 				direction *= (-1);
 				astronave.vite--;
-				beep();
+				//beep();
 				aggiungi_job(astronave);
 				/*setto vettore da passare per la creazione di una bomba*/
 				parAstronave2[0] = astronave.x;
@@ -328,6 +329,7 @@ void* t_astronave1 (void* arg){
 			if(astronave.x + direction == MAXX - astronave.dim || astronave.x + direction == MINX) {
 				direction = -direction;
 				astronave.y+=2;
+				if(astronave.y >= MAXY -2) end_layer=true;
 			}
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
@@ -341,7 +343,7 @@ void* t_astronave1 (void* arg){
 				/*setto vettore da passare per la creazione di una bomba*/
 				parBomba[0]= astronave.x;
 				parBomba[1]= astronave.y;
-				parBomba[2]= id_bomba;
+				parBomba[2]= id_bomba; //generatorId()?
 				parBomba[3]= astronave.dim;
 	
 				pthread_create(&bomba, NULL, &t_bomba, parBomba);

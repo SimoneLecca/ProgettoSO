@@ -10,6 +10,7 @@ void start(){
 	pthread_mutex_t mutex_astronave = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t mutex_id = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t mutex_punteggio = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t mutex_player = PTHREAD_MUTEX_INITIALIZER;
 
 	punteggio = 0;
 
@@ -23,6 +24,17 @@ void start(){
 	end_layer= false;	//le astronavi nemiche sono arrivate all'ultimo layer e vincono	
 	
 	newId=0; //varibile per generare gli id degli oggetti in gioco
+
+	// inizializzo il giocatore
+	player.id = generatorId();
+	player.sprite[0] = "<|--|>";
+	player.dim=6;
+	player.dimy=1;
+	player.x = (int)MAXX/2-player.dim/2;
+	player.y = MAXY-MINY -1;
+	player.vite=N_VITE;
+	player.tipo=GAMER;
+	
 }
 
 /*inizializza il semaforo*/
@@ -55,6 +67,7 @@ void print_home(){
 	print_box(); // richiamo la funzione di stampa bordo
 	
 	/*ciclo utilizzato per la stampa degli sprite*/
+	//pthread_mutex_lock(&mutex_scrn);
 	for(i=0;i<n_mostri+1;i++){
 		attron(COLOR_PAIR(i)); //funzioneche cambia il colore della prossima scritta
 		
@@ -156,6 +169,7 @@ void print_home(){
 	curs_set(0);
 	refresh();
    	print_box();
+	//pthread_mutex_unlock(&mutex_scrn);
 }
 
 // stampa il bordo

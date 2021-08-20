@@ -38,12 +38,15 @@
 #define ASTRONAVE2 5 // identifica l'astronave di lv2
 #define BOMBA 6
 
+//PLAYER
+#define N_VITE 8
+
 //NEMICI
-#define N_ASTONAVI_NEMICHE 5	//n di astronavi nemiche totali
+#define N_ASTONAVI_NEMICHE 3	//n di astronavi nemiche totali
 #define DELAY_ASTRONAVI 2000000 //delay tra un'astronave nemica e l'altra
 
 // dimensione buffer
-#define DIM_BUFFER 50
+#define DIM_BUFFER 30
 
 #define OBJ_ON_SCREEN 50 // NUMERO OGGETTI MASSIMI A SCERMO
 
@@ -54,8 +57,11 @@ pthread_mutex_t mutex_fire; // mutex per l'accesso alla variabile utilizzata per
 pthread_mutex_t mutex_boom; // mutex per l'accesso alla variabile utilizzata per il lancio di bombe
 pthread_mutex_t mutex_id; // mutex per l'accesso alla variabile utilizzata per la creazione degli id
 pthread_mutex_t mutex_punteggio; // mutex per l'accesso alla variabile utilizzata per il lancio di bombe
+pthread_mutex_t mutex_player;
 
 sem_t buffer_count; // semaforo per l'accesso al buffer
+
+void* t_gStatus(void* arg);
 
 // struttura che identifica un oggeto
 struct oggetto{
@@ -74,6 +80,8 @@ struct Node {
     struct Node *next;
 };
 
+struct oggetto player;
+
 void aggiungi_job (struct oggetto);
 void stampaOggetto(struct oggetto);
 void cancellaOggetto(struct oggetto, int);
@@ -82,7 +90,7 @@ int isColliding(struct oggetto, struct oggetto[]);
 int punteggio;
 int counter; // contatore per il buffer
 struct oggetto buffer[DIM_BUFFER]; // BUFFER
-int collision_m [OBJ_ON_SCREEN][2];
+int collision_m [OBJ_ON_SCREEN][4];
 
 int fire[2];// casin0000
 int boom[3];// 0/1, x, y

@@ -1,17 +1,30 @@
 #include "function.h"
 #include "define.h"
 
+
+void aggiornaId(int punt){
+	pthread_mutex_lock(&mutex_scrn);
+	mvprintw(MAXY +2, 2, "numero Id: %d", punt); 
+	usleep(100);
+	mvprintw(MAXY +3, 2, "p: %d, e: %d, l: %d", end_player, end_enemis, end_layer); 
+	pthread_mutex_unlock(&mutex_scrn);
+}
+
 //funzione per generare gli id degli oggetti in gioco
 int generatorId(){
 	int returnId=0;
 	pthread_mutex_lock(&mutex_id);
-	if(newId <= OBJ_ON_SCREEN)
+	if(newId <= OBJ_ON_SCREEN){
 		newId++;
 		returnId=newId;
+		aggiornaId(returnId);
+	}
+	
 	pthread_mutex_unlock(&mutex_id);
 	
 	return returnId;
 }
+
 
 
 /*aggiunge un nuova posizine nel buffer*/
@@ -83,9 +96,10 @@ int isColliding(struct oggetto obj, struct oggetto all_obj[]){
 				if( ((all_obj[i].y >= obj.y && all_obj[i].y <= obj.y + (obj.dimy-1)) 
 				|| (all_obj[i].y+(all_obj[i].dimy-1) >= obj.y && all_obj[i].y+ (all_obj[i].dimy -1) <= obj.y + (obj.dimy -1)))){
 					/**COLLISIONE RILEVATA*/
-					
-					collision_m [obj.id][2] =all_obj[i].x;	//x
+					pthread_mutex_lock(&mutex_collision);
+					collision_m [obj.id][2] =all_obj[i].x;	//x per capire che parte della seconda navicella 'e stata colpita
 					collision_m [obj.id][3] =all_obj[i].y;	//y
+					pthread_mutex_unlock(&mutex_collision);
 					return all_obj[i].tipo;
 					
 				}
@@ -98,7 +112,7 @@ int isColliding(struct oggetto obj, struct oggetto all_obj[]){
 	/*BORDO Y*/	
 	if(obj.y <= MINY ) return BORDO;
 	/*BORDO X*/
-	if(obj.y >= MAXY -2 ) return BORDO;
+	if(obj.y >= MAXY -2) return BORDO;
 
 	return -1;	
 	
@@ -129,27 +143,27 @@ void controllore(){
 		old_obj = all_obj[new_obj.id];
 		all_obj[new_obj.id]=new_obj;
 
-		pthread_mutex_lock(&mutex_collision);
+
 		
 		cancellaOggetto(old_obj, new_obj.dim);
-		stampaOggetto(new_obj);
 
 		/*fine---------------------------------------------------------------------------------------------------------------------------------------------------*/
 
 		/*CONTROLLO COLLISIONI (se avenute): solo se vite > 0*/
 		if(new_obj.vite > 0){
+			stampaOggetto(new_obj);
 			/*Trovo id oggetto colliso: -1 = nessuno*/			
 			colliso = isColliding(new_obj, all_obj);
 			if(colliso != -1){ 
+				pthread_mutex_lock(&mutex_collision);
 				collision_m [new_obj.id][0]=1;
-				collision_m [new_obj.id][1]=colliso;				
+				collision_m [new_obj.id][1]=colliso;	
+				pthread_mutex_unlock(&mutex_collision);			
 			}
 		}
 		/*Se le vite sono 0 cancello l'oggetto dallo schermo*/
-		else{ cancellaOggetto(new_obj, new_obj.dim); }
-	
 		
-		pthread_mutex_unlock(&mutex_collision);
+		
 	}
 }
 
@@ -175,7 +189,8 @@ void end_game(){
 
 	clear();
 	print_box(); // richiamo la funzione di stampa bordo
-	
+
+	pthread_mutex_lock(&mutex_scrn);
 	/*ciclo utilizzato per la stampa degli sprite*/
 	for(i=0;i<n_mostri+1;i++){
 		attron(COLOR_PAIR(i)); //funzioneche cambia il colore della prossima scritta
@@ -242,7 +257,7 @@ void end_game(){
 
 	curs_set(0);
 	refresh();
-
+	pthread_mutex_unlock(&mutex_scrn);
 	// appena il giocatore preme un tasto finisce il gioco
         c = getch();     
 	while(SPACE != getch());

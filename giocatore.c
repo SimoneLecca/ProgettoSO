@@ -1,7 +1,13 @@
 #include "function.h"
 #include "define.h"
 
-
+/*void aggiornaVite(int vite){
+	usleep(10);
+	pthread_mutex_lock(&mutex_scrn);
+	mvprintw(MAXY +4, 2, "Vite: %d    ", vite); 
+	pthread_mutex_unlock(&mutex_scrn);
+}
+*/
 /*thread che controlla un singolo missile*/
 void* t_missile(void* arg){
 	/*dichiaro e inizializzo il missile*/
@@ -13,7 +19,7 @@ void* t_missile(void* arg){
 	missile.dim=1;
 	missile.dimy=1;
 	missile.x = param[1];
-	missile.y = MAXY-MINY-1;
+	missile.y = MAXY-MINY-2;
 	missile.vite=1;
 
 	while(missile.vite > 0){
@@ -69,38 +75,74 @@ void* t_lanciatore_missili(void* arg){
 	free(id_missile2);
 }
 
+void* t_gStatus(void* arg){
+	usleep(DELAY);
+	pthread_mutex_lock(&mutex_player);
+	struct oggetto giocatore= player;
+	pthread_mutex_unlock(&mutex_player);
+	aggiungi_job(giocatore); // invio nel bufffer la prima posizione
+	
+	while(giocatore.vite > 0) {
+		
+
+		/*Controllo se il missile ha Colliso*/
+		pthread_mutex_lock(&mutex_collision);
+		if(collision_m[giocatore.id][0]==1 && collision_m[giocatore.id][1]==BOMBA){
+			collision_m[giocatore.id][0]=0;
+			giocatore.vite--; //flash(); beep();
+			aggiornaPunteggio(-20);
+
+			pthread_mutex_unlock(&mutex_player);
+			player.vite=giocatore.vite;
+			pthread_mutex_unlock(&mutex_player);	
+		}
+		else{collision_m[giocatore.id][0]=0;}
+		pthread_mutex_unlock(&mutex_collision);
+		
+		pthread_mutex_unlock(&mutex_player);
+		giocatore= player;
+		aggiungi_job(giocatore);
+		pthread_mutex_unlock(&mutex_player);
+		usleep(DELAY);
+
+		
+	}
+
+	//Se esce dal ciclo vuol dire che il giocatore ha finito le vite, quindi perde.
+	end_player = true;
+}
+
 /*si occupa di aggiornare la posizione della navicella del giocatore alla pressione dei tasti direzionali, aggiorna il fire "spara i missili" quando il giocatore preme spazio*/
 void* t_giocatore(void* arg)
 {
-	struct oggetto giocatore; // contiene i dati del giocatore
+	usleep(DELAY);
+	pthread_mutex_lock(&mutex_player);
+	struct oggetto giocatore= player;
+	pthread_mutex_unlock(&mutex_player);
+
 	bool flag;
 	char c; // contiene il caratte premuto da tastiera
-	// inizializzo il giocatore
-	giocatore.id = generatorId();
-	giocatore.sprite[0] = "<|--|>";
-	giocatore.dim=6;
-	giocatore.dimy=1;
-	giocatore.x = MAXX/2-giocatore.dim/2;
-	giocatore.y = MAXY-MINY;
-	giocatore.vite=3;
-	giocatore.tipo=GAMER;
-	
 	
 	flag=false; 	
 	aggiungi_job(giocatore); // invio nel bufffer la prima posizione
 	
 	while(giocatore.vite > 0) {
 
+
+	//aggiornaVite(giocatore.vite);
+
 		/*Controllo se il missile ha Colliso*/
-		pthread_mutex_lock(&mutex_collision);
-		if(collision_m[giocatore.id][0]==1 && collision_m[giocatore.id][1]==BOMBA){
+		/*pthread_mutex_lock(&mutex_collision);
+		if(collision_m[giocatore.id][0]==1 ){
 			collision_m[giocatore.id][0]=0;
 			giocatore.vite--; flash(); beep();
 			aggiornaPunteggio(-20);
 		}
 		pthread_mutex_unlock(&mutex_collision);
+		*/
+		
 
-		flag = false;
+		//flag = false;
 		// controllo quale tastio viene premuto
 		switch(c=getch()) {
 		// se preme destra o sinistra aggiono la posizione della navicella
@@ -127,9 +169,13 @@ void* t_giocatore(void* arg)
 			flag=true;
 			break;
 		}
+		pthread_mutex_unlock(&mutex_player);
+		player.x=giocatore.x;
+		player.y=giocatore.y;
+		pthread_mutex_unlock(&mutex_player);
 		// solo se utente ha premuto i tasti direzionali allora invio nel buffer la nuova posizione
-		if (!flag)
-			aggiungi_job(giocatore);
+		//if (!flag)
+		//	aggiungi_job(giocatore);
 
 		
 	}
