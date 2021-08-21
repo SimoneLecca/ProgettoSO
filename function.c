@@ -1,6 +1,13 @@
 #include "function.h"
 #include "define.h"
 
+bool partitaFinita(){
+	pthread_mutex_lock(&mutex_end);
+	bool risultato = (end_player || end_enemis || end_layer);
+	pthread_mutex_unlock(&mutex_end);
+	return risultato;
+	
+}
 
 void aggiornaId(int punt){
 	pthread_mutex_lock(&mutex_scrn);
@@ -238,6 +245,7 @@ void end_game(){
 	
 	if(end_player || end_layer){
 		/*altra stampa nella home*/
+		mvprintw(19,50,"    Hai perso! Punteggio: %d", punteggio);
 		mvprintw(20,50,"  ____                         ___                 ");
 		mvprintw(21,50," / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __ ");
 		mvprintw(22,50,"| |  _ / _` | '_ ` _ \\ / _ \\ | | | \\ \\ / / _ \\ '__|");
@@ -247,6 +255,7 @@ void end_game(){
 	}
 	else{
 		/*altra stampa nella home*/
+		mvprintw(19,50,"     Hai vinto! Punteggio: %d", punteggio);
 		mvprintw(20,50,"__   __           __        ___       ");
 		mvprintw(21,50,"\\ \\ / /__  _   _  \\ \\      / (_)_ __  ");
 		mvprintw(22,50," \\ V / _ \\| | | |  \\ \\ /\\ / /| | '_ \\ ");

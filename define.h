@@ -39,7 +39,7 @@
 #define BOMBA 6
 
 //PLAYER
-#define N_VITE 8
+#define N_VITE 2
 
 //NEMICI
 #define N_ASTONAVI_NEMICHE 3	//n di astronavi nemiche totali
@@ -58,6 +58,7 @@ pthread_mutex_t mutex_boom; // mutex per l'accesso alla variabile utilizzata per
 pthread_mutex_t mutex_id; // mutex per l'accesso alla variabile utilizzata per la creazione degli id
 pthread_mutex_t mutex_punteggio; // mutex per l'accesso alla variabile utilizzata per il lancio di bombe
 pthread_mutex_t mutex_player;
+pthread_mutex_t mutex_end;
 
 sem_t buffer_count; // semaforo per l'accesso al buffer
 

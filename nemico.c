@@ -26,15 +26,16 @@ void* t_bomba(void* arg){
 		if(collision_m[bomba.id][0]==1){
 			collision_m[bomba.id][0]=0;
 			bomba.vite--;
-			aggiungi_job(bomba);
+			//aggiungi_job(bomba);
 		}
 		pthread_mutex_unlock(&mutex_collision);
 
 		/*Aggiorno posizione bomba e lo passo ad aggiungi_job se e' ancora vivo*/
 		if(bomba.vite>0){ 
 			bomba.y++;
-			aggiungi_job(bomba);
+			//aggiungi_job(bomba);
 		}
+		aggiungi_job(bomba);
 		usleep(DELAY);
 	}
 	return NULL;
@@ -73,7 +74,7 @@ void* t_astronave2 (void* arg){
 	astronave.dimy=2;
 	astronave.x = parAstronave2[0];
 	astronave.y = parAstronave2[1];
-	astronave.vite=sxup+sxdown+dxup+dxdown;
+	astronave.vite=2;
 	astronave.tipo= ASTRONAVE2;
 	int direction=parAstronave2[2];    /* Spostamento orizzontale */
 	
@@ -81,7 +82,7 @@ void* t_astronave2 (void* arg){
 	int countB = 1; 	/*contatore per bomba*/
 	int r;			//ver per numero random, 0 o 1
 	
-	while(astronave.vite > 0){
+	while(astronave.vite > 0 || partitaFinita()){
 		/*Controllo se l'astronave ha Colliso*/
 		
 		pthread_mutex_lock(&mutex_collision);
@@ -157,7 +158,7 @@ void* t_astronave2 (void* arg){
 				}
 				else if(!nav_dxdown) astronave.sprite[1]="0^";
 				
-				aggiungi_job(astronave);
+				//aggiungi_job(astronave);
 			
 				
 			}
@@ -182,7 +183,7 @@ void* t_astronave2 (void* arg){
 			}
 
 
-			aggiungi_job(astronave);
+			//aggiungi_job(astronave);
 		
 			//lancio una bomba in un intervallo tra i 50 e i 100 cicli
 			r = random()%2;
@@ -208,53 +209,45 @@ void* t_astronave2 (void* arg){
 			}
 			countB++;
 		}
+		aggiungi_job(astronave);
 		usleep(DELAY);
 	}
 	
-	//navicella distrutta Animazione
-	astronave.vite=1;
-	astronave.sprite[0]="**";
-	astronave.sprite[1]="**";
-	aggiungi_job(astronave);
-	usleep(DELAY*3);
-	astronave.sprite[0]="~~";
-	astronave.sprite[1]="~~";
-	aggiungi_job(astronave);
-	usleep(DELAY*3);
-	astronave.vite=1;
-	astronave.sprite[0]="**";
-	astronave.sprite[1]="**";
-	aggiungi_job(astronave);
-	usleep(DELAY*3);
-	astronave.sprite[0]="~~";
-	astronave.sprite[1]="~~";
-	aggiungi_job(astronave);
-	usleep(DELAY*3);
-	astronave.vite=0;
-	aggiungi_job(astronave);
+	if(astronave.vite <=0){//navicella distrutta Animazione
+		astronave.vite=1;
+		astronave.sprite[0]="**";
+		astronave.sprite[1]="**";
+		aggiungi_job(astronave);
+		usleep(DELAY*3);
+		astronave.sprite[0]="~~";
+		astronave.sprite[1]="~~";
+		aggiungi_job(astronave);
+		usleep(DELAY*3);
+		astronave.vite=1;
+		astronave.sprite[0]="**";
+		astronave.sprite[1]="**";
+		aggiungi_job(astronave);
+		usleep(DELAY*3);
+		astronave.sprite[0]="~~";
+		astronave.sprite[1]="~~";
+		aggiungi_job(astronave);
+		usleep(DELAY*3);
+		astronave.vite=0;
+		aggiungi_job(astronave);
 	
-	aggiornaPunteggio(40);
+		aggiornaPunteggio(40);
+	}
 
 	while (l != NULL) {
 		pthread_join (l->info, NULL);
-        l = l->next;
-    }
+        	l = l->next;
+    	}
 
 	return NULL;
 }
 
 /*----------------------------------------------------------------------------------------
 /*
-
-
-
-
-
-
-
-
-
-
 
 ------------------------------------------------------------------------------------------
  Funzione Astronave LV1 - simile missili e astronave madre
@@ -293,7 +286,7 @@ void* t_astronave1 (void* arg){
 	int countB = 1; 	/*contatore per bomba*/
 	int r;			//ver per numero random, 0 o 1
 	
-	while(astronave.vite > 0){		
+	while(astronave.vite > 0  || partitaFinita()){		
 		/*Controllo se l'astronave ha Colliso*/
 		pthread_mutex_lock(&mutex_collision);
 		if(collision_m[astronave.id][0]==1){
@@ -304,7 +297,7 @@ void* t_astronave1 (void* arg){
 				direction *= (-1);
 				astronave.vite--;
 				//beep();
-				aggiungi_job(astronave);
+				//aggiungi_job(astronave);
 				/*setto vettore da passare per la creazione di una bomba*/
 				parAstronave2[0] = astronave.x;
 				parAstronave2[1] = astronave.y;
@@ -334,7 +327,7 @@ void* t_astronave1 (void* arg){
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
 			}
-			aggiungi_job(astronave);
+			//aggiungi_job(astronave);
 
 			//lancio una bomba in un intervallo tra i 50 e i 100 cicli
 			r = random()%2;
@@ -360,16 +353,19 @@ void* t_astronave1 (void* arg){
 			}
 			countB++;
 		}
+		
+		//AGGIORNO LA POSIZIONE
+		aggiungi_job(astronave);
 		usleep(DELAY);
 	}
 
-	
-	pthread_join (astronaveLV2, NULL);
+	//se ha 0 vite (quindi si 'e creata la lv2, aspetto che finisca)
+	if(astronave.vite >= 0) pthread_join (astronaveLV2, NULL);
 	
 	while (l != NULL) {
 		pthread_join (l->info, NULL);
-        l = l->next;
-    }
+        	l = l->next;
+    	}
 
 	return NULL;
 }
@@ -394,51 +390,12 @@ void* t_generatore_astronavi(void* arg){
 		usleep(DELAY_ASTRONAVI);
 	}
 
-	
-	count = 0;
-	while(count < N_ASTONAVI_NEMICHE) {
-		pthread_join (astronave[count], NULL);
-		count++;
+	while(count > 0){
+		pthread_join (astronave[count-1], NULL);
+		count--;
 	}
 	end_enemis = true;
 }
-
-/*------------------------------------------------------------------------------------------
- THREAD LANCIATORE BOMBE - ogni astronave nemica ne ha uno
-------------------------------------------------------------------------------------------*/ 
-/*
-void* t_lanciatore_bomba(void* arg){
-	pthread_t bomba; // id thread dei missili
-	bool flag=false; // flag generico
-	int* id_missile = (int *) malloc(sizeof(int)*2);
-	id_missile[0] = generatorId();
-	int* id_missile2 = (int *) malloc(sizeof(int)*2);
-	id_missile2[0] = generatorId();
-	
-	while(1){
-		pthread_mutex_lock(&mutex_fire);
-			flag= (bool)fire[0]; // fire variabile globale che in posizione 0 contine un flag che avvisa quando il giocatore preme spazio
-			id_missile[1]=fire[1];
-			id_missile2[1]=fire[1]+5;
-		pthread_mutex_unlock(&mutex_fire);
-		// se il giocatore preme spazio allora faccio partire i thread dei missili
-		if (flag){		
-
-		pthread_create(&missile1, NULL, &t_missile, id_missile); 
-		pthread_create(&missile2, NULL, &t_missile, id_missile2); 
-		
-		pthread_join (missile1, NULL);
-		pthread_join (missile2, NULL);		
-		pthread_mutex_lock(&mutex_fire);
-			fire[0]= 0; // aggiorno il flag 
-		pthread_mutex_unlock(&mutex_fire);	
-		}
-	}
-	free(id_missile);/// liberare memoria della malloc
-	free(id_missile2);
-}*/
-
-
 
 
 

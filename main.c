@@ -16,8 +16,8 @@ int main(){
 	for(i=0;i<OBJ_ON_SCREEN;i++){
 		collision_m [i][0]=0;
 		collision_m [i][1]=0;
-		//collision_m [i][2]=0;
-		//collision_m [i][3]=0;
+		collision_m [i][2]=0;
+		collision_m [i][3]=0;
 	}
 	
 	print_home(); // stampa a video la home
