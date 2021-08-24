@@ -34,7 +34,8 @@ void* t_missile(void* arg){
 			pthread_mutex_unlock(&mutex_collision);
 			missile.vite--;
 		}
-		else if(missile.vite>0) {missile.y--;} //Aggiorno posizione missile e lo passo ad aggiungi_job se e' ancora vivo
+		
+		if(missile.vite>0) {missile.y--;} //Aggiorno posizione missile e lo passo ad aggiungi_job se e' ancora vivo
 		
 		aggiungi_job(missile);
 		usleep(DELAY);

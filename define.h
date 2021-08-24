@@ -94,6 +94,8 @@ int counter; // contatore per il buffer
 struct oggetto buffer[DIM_BUFFER]; // BUFFER
 int collision_m [OBJ_ON_SCREEN][4];
 
+clock_t delayR;
+
 int fire[2];// casin0000
 int boom[3];// 0/1, x, y
 

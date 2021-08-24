@@ -26,6 +26,8 @@ void start(){
 	
 	newId=0; //varibile per generare gli id degli oggetti in gioco
 
+	delayR = clock();
+
 	// inizializzo il giocatore
 	player.id = generatorId();
 	player.sprite[0] = "<|--|>";

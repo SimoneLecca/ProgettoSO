@@ -100,7 +100,6 @@ void* t_astronave2 (void* arg){
 			/*COLLISIONE CON MISSILE*/
 			if(tipoColliso==MISSILE){
 				direction *= (-1);
-				astronave.vite--;
 				//Inividuo la navicella colpita
                                 if(astronave.x == xColliso){ //sxdown
                                 	if(astronave.y == yColliso){ //sxup

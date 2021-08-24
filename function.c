@@ -9,6 +9,13 @@ bool partitaFinita(){
 	
 }
 
+/*void* t_delayTempoReale(void* arg){
+	while(!partitaFinita()){
+		delayR += DELAY;
+		usleep(delayR);
+	}
+}*/
+
 void aggiornaId(int punt){
 	/*pthread_mutex_lock(&mutex_scrn);
 	mvprintw(MAXY +2, 2, "numero Id: %d", punt); 

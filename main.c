@@ -5,7 +5,7 @@ int main(){
 	
 	start();
 	/*dichiarazione variabili*/
-	pthread_t giocatore, gStatus, lanciatore_missili, generatore_astronavi; // id dei thread che verranno lanciati
+	pthread_t giocatore, gStatus, lanciatore_missili, generatore_astronavi, delayTempoReale; // id dei thread che verranno lanciati
 	
 	/*inizializzo schermo */
 	initscr();
@@ -15,6 +15,7 @@ int main(){
 	
 	print_home(); // stampa a video la home
 	inizializza_coda(); // inizializza il semaforo
+	//pthread_create(&delayTempoReale, NULL, &t_delayTempoReale, NULL); 
 	pthread_create(&giocatore, NULL, &t_giocatore, NULL); // lancia il thread che controlla la navicella del giocatore
 	pthread_create(&gStatus, NULL, &t_gStatus, NULL); // lancia il thread che controlla la navicella del giocatore
 	pthread_create(&lanciatore_missili, NULL, &t_lanciatore_missili, NULL); // lancia il thread che controlla i missili che lancia la navicella del giocatore
