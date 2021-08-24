@@ -1,4 +1,4 @@
-#include "function.h"
+	#include "function.h"
 #include "define.h"
 
 int main(){
@@ -6,19 +6,12 @@ int main(){
 	start();
 	/*dichiarazione variabili*/
 	pthread_t giocatore, gStatus, lanciatore_missili, generatore_astronavi; // id dei thread che verranno lanciati
-	int i=0; // contatore
 	
 	/*inizializzo schermo */
 	initscr();
 	noecho();
 	curs_set(false);
-	/*inizializzazione variabili, anche quelle pubbliche */
-	for(i=0;i<OBJ_ON_SCREEN;i++){
-		collision_m [i][0]=0;
-		collision_m [i][1]=0;
-		collision_m [i][2]=0;
-		collision_m [i][3]=0;
-	}
+	
 	
 	print_home(); // stampa a video la home
 	inizializza_coda(); // inizializza il semaforo
@@ -29,8 +22,22 @@ int main(){
 
 	controllore(); // si occupa di: leggere dal buffer, stampare a video gli oggetti in gioco, controllare le collisioni
 
+	//flash();beep();
+	//usleep(DELAY*100);
+	
+	pthread_join (gStatus, NULL);	//quando vince il giocatore
+	pthread_join (lanciatore_missili, NULL); //quando vince il giocatore
+	pthread_join (generatore_astronavi, NULL); //quando vince il nemico
 	end_game(); // stampa la fine della partita
+	pthread_join (giocatore, NULL);	
+	
+		
+	
+	
 
+	//TERMINA I THREAD QUIIII
+	
+	
 	endwin();
 	return 0;
 }

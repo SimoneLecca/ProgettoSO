@@ -11,6 +11,7 @@ void start(){
 	pthread_mutex_t mutex_id = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t mutex_punteggio = PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t mutex_player = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t mutex_end = PTHREAD_MUTEX_INITIALIZER;
 
 	punteggio = 0;
 
@@ -34,6 +35,14 @@ void start(){
 	player.y = MAXY-MINY -1;
 	player.vite=N_VITE;
 	player.tipo=GAMER;
+
+	/*inizializzazione variabili, anche quelle pubbliche */
+	for(int i=0;i<OBJ_ON_SCREEN;i++){
+		collision_m [i][0]=0;
+		collision_m [i][1]=0;
+		collision_m [i][2]=0;
+		collision_m [i][3]=0;
+	}
 	
 }
 

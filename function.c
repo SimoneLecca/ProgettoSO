@@ -10,11 +10,11 @@ bool partitaFinita(){
 }
 
 void aggiornaId(int punt){
-	pthread_mutex_lock(&mutex_scrn);
+	/*pthread_mutex_lock(&mutex_scrn);
 	mvprintw(MAXY +2, 2, "numero Id: %d", punt); 
-	usleep(100);
+	//usleep(100);
 	mvprintw(MAXY +3, 2, "p: %d, e: %d, l: %d", end_player, end_enemis, end_layer); 
-	pthread_mutex_unlock(&mutex_scrn);
+	pthread_mutex_unlock(&mutex_scrn);*/
 }
 
 //funzione per generare gli id degli oggetti in gioco
@@ -145,12 +145,10 @@ void controllore(){
 	struct oggetto all_obj[OBJ_ON_SCREEN];	// contiene tutti gli oggetti attivi nello schermo
 
 	//Finche non si verifica una condizione di fine parta continua
-	while(!(end_player || end_enemis || end_layer)){
+	while(!partitaFinita()){
 		new_obj = (struct oggetto)elimina(); // prendo un oggetto dal buffer
 		old_obj = all_obj[new_obj.id];
 		all_obj[new_obj.id]=new_obj;
-
-
 		
 		cancellaOggetto(old_obj, new_obj.dim);
 
@@ -175,13 +173,14 @@ void controllore(){
 }
 
 void end_game(){
+	
 	int x=0,y=0; // x y ci aiuteranno a stampare a video nelle cordinate giuste
 	int i=0; // contatore
 	int n_mostri=5; // numero di sprite dentro la prima schermata
 	int dir=1;
 	char c;
 
-	/*inizializzo i colori*/
+	//inizializzo i colori
 	start_color();
 	init_color(COLOR_MAGENTA, 700,300,0); // il magenta lo facccio diventare arancione
 	init_pair(1,COLOR_RED,COLOR_RED);  // al numero uno abbiamo rosso su sfondo rosso
@@ -198,7 +197,7 @@ void end_game(){
 	print_box(); // richiamo la funzione di stampa bordo
 
 	pthread_mutex_lock(&mutex_scrn);
-	/*ciclo utilizzato per la stampa degli sprite*/
+	//ciclo utilizzato per la stampa degli sprite
 	for(i=0;i<n_mostri+1;i++){
 		attron(COLOR_PAIR(i)); //funzioneche cambia il colore della prossima scritta
 		
@@ -244,7 +243,7 @@ void end_game(){
 	attron(COLOR_PAIR(6));
 	
 	if(end_player || end_layer){
-		/*altra stampa nella home*/
+		//altra stampa nella home
 		mvprintw(19,50,"    Hai perso! Punteggio: %d", punteggio);
 		mvprintw(20,50,"  ____                         ___                 ");
 		mvprintw(21,50," / ___| __ _ _ __ ___   ___   / _ \\__   _____ _ __ ");
@@ -254,7 +253,7 @@ void end_game(){
 		mvprintw(25,50,"        Press 'SPACE' for close the game                ");
 	}
 	else{
-		/*altra stampa nella home*/
+		//altra stampa nella home
 		mvprintw(19,50,"     Hai vinto! Punteggio: %d", punteggio);
 		mvprintw(20,50,"__   __           __        ___       ");
 		mvprintw(21,50,"\\ \\ / /__  _   _  \\ \\      / (_)_ __  ");
@@ -268,13 +267,16 @@ void end_game(){
 	refresh();
 	pthread_mutex_unlock(&mutex_scrn);
 	// appena il giocatore preme un tasto finisce il gioco
-        c = getch();     
+        
+	c = getch();     
 	while(SPACE != getch());
-
    	
    	clear();
 	curs_set(0);
 	refresh();
    	print_box();
+
+
+
 }
 

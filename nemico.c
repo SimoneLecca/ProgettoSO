@@ -20,25 +20,27 @@ void* t_bomba(void* arg){
 	bomba.y = parBomba[1] +1;
 
 
-	while(bomba.vite > 0){
+	while(bomba.vite > 0 && !partitaFinita()){
 		/*Controllo se la bomba ha Colliso*/
 		pthread_mutex_lock(&mutex_collision);
-		if(collision_m[bomba.id][0]==1){
-			collision_m[bomba.id][0]=0;
-			bomba.vite--;
-			//aggiungi_job(bomba);
-		}
+		int colliso= collision_m[bomba.id][0];
 		pthread_mutex_unlock(&mutex_collision);
+		if(colliso && !partitaFinita()){
+			pthread_mutex_lock(&mutex_collision);
+			collision_m[bomba.id][0]=0;
+			pthread_mutex_unlock(&mutex_collision);
+			bomba.vite--;
+		}
+		
 
 		/*Aggiorno posizione bomba e lo passo ad aggiungi_job se e' ancora vivo*/
 		if(bomba.vite>0){ 
 			bomba.y++;
-			//aggiungi_job(bomba);
 		}
 		aggiungi_job(bomba);
 		usleep(DELAY);
 	}
-	return NULL;
+	//return NULL;
 } 
 
 /*
@@ -82,25 +84,31 @@ void* t_astronave2 (void* arg){
 	int countB = 1; 	/*contatore per bomba*/
 	int r;			//ver per numero random, 0 o 1
 	
-	while(astronave.vite > 0 || partitaFinita()){
+	while(astronave.vite > 0 && !partitaFinita()){
 		/*Controllo se l'astronave ha Colliso*/
 		
 		pthread_mutex_lock(&mutex_collision);
-		if(collision_m[astronave.id][0]==1){
+		int colliso= collision_m[astronave.id][0];
+		int tipoColliso = collision_m[astronave.id][1];
+		int xColliso = collision_m[astronave.id][2];
+		int yColliso = collision_m[astronave.id][3];
+		pthread_mutex_unlock(&mutex_collision);
+		if(colliso == 1){
+			pthread_mutex_lock(&mutex_collision);
 			collision_m[astronave.id][0]=0;
-
+			pthread_mutex_unlock(&mutex_collision);
 			/*COLLISIONE CON MISSILE*/
-			if(collision_m[astronave.id][1]==MISSILE){
+			if(tipoColliso==MISSILE){
 				direction *= (-1);
-				/*Inividuo la navicella colpita*/
-                                if(astronave.x == collision_m[astronave.id][2]){ //sxdown
-                                	if(astronave.y == collision_m[astronave.id][3]){ //sxup
+				astronave.vite--;
+				//Inividuo la navicella colpita
+                                if(astronave.x == xColliso){ //sxdown
+                                	if(astronave.y == yColliso){ //sxup
                                 		if(sxup >0){
                                 			sxup--;
                                 			aggiornaPunteggio(5);
                                 			astronave.vite--;
-							//beep();
-                                			if(sxup == 0) nav_sxup=false;
+                                			if(sxup == 0){nav_sxup=false;}
                                 		}
                                 	}
                                 	else{//sxdown
@@ -120,13 +128,13 @@ void* t_astronave2 (void* arg){
                                 	}
 				}
 				else{//dx
-					if(astronave.y == collision_m[astronave.id][3]){ //dxup
+					if(astronave.y == yColliso){ //dxup
 						if(dxup >0){
                                 			dxup--;
                                 			aggiornaPunteggio(5);
                                 			astronave.vite--;
 							//beep();
-							if(dxup == 0) nav_dxup=false;
+							if(dxup == 0){ nav_dxup=false;}
                               				
                                 		}
                                 	}
@@ -164,19 +172,23 @@ void* t_astronave2 (void* arg){
 			}
 			
 			/*COLLISIONE CON ASTRONAVE*/
-			if(collision_m[astronave.id][1]==ASTRONAVE1 || collision_m[astronave.id][1]==ASTRONAVE2){
+			if(tipoColliso==ASTRONAVE1 || tipoColliso==ASTRONAVE2){
 				direction *= (-1);
 			}	
 		}
-		pthread_mutex_unlock(&mutex_collision);
+		
 		
 		//Se la navicella e' ancora viva effettuo lo spostamento
-		if(astronave.vite>0){
+		if(astronave.vite>0 && !partitaFinita()){
 			//se' raggiunge il bordo cambia direzione e scende di y
 			if(astronave.x + direction == MAXX - astronave.dim || astronave.x + direction == MINX) {
 				direction = -direction;
 				astronave.y+=2;
-				if(astronave.y >= MAXY -2) end_layer=true;
+				if(astronave.y >= MAXY -2) {
+					pthread_mutex_lock(&mutex_end);
+					end_layer=true;
+					pthread_mutex_unlock(&mutex_end);
+				}
 			}
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
@@ -237,13 +249,15 @@ void* t_astronave2 (void* arg){
 	
 		aggiornaPunteggio(40);
 	}
-
+	
 	while (l != NULL) {
 		pthread_join (l->info, NULL);
         	l = l->next;
     	}
 
-	return NULL;
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +10, 2, "t_astronave2 %d:ok", astronave.id); 
+	pthread_mutex_unlock(&mutex_scrn);
 }
 
 /*----------------------------------------------------------------------------------------
@@ -286,14 +300,20 @@ void* t_astronave1 (void* arg){
 	int countB = 1; 	/*contatore per bomba*/
 	int r;			//ver per numero random, 0 o 1
 	
-	while(astronave.vite > 0  || partitaFinita()){		
+	while(astronave.vite > 0  && !partitaFinita()){		
 		/*Controllo se l'astronave ha Colliso*/
 		pthread_mutex_lock(&mutex_collision);
-		if(collision_m[astronave.id][0]==1){
+		int colliso= collision_m[astronave.id][0];
+		int tipoColliso = collision_m[astronave.id][1];
+		int xColliso = collision_m[astronave.id][2];
+		int yColliso = collision_m[astronave.id][3];
+		pthread_mutex_unlock(&mutex_collision);
+		if(colliso==1){
+			pthread_mutex_lock(&mutex_collision);
 			collision_m[astronave.id][0]=0;
-			
+			pthread_mutex_unlock(&mutex_collision);
 			/*COLLISIONE CON MISSILE*/
-			if(collision_m[astronave.id][1]==MISSILE){
+			if(tipoColliso==MISSILE){
 				direction *= (-1);
 				astronave.vite--;
 				//beep();
@@ -310,11 +330,10 @@ void* t_astronave1 (void* arg){
 			}	
 				
 			/*COLLISIONE CON ASTRONAVE*/
-			if(collision_m[astronave.id][1]==ASTRONAVE1 || collision_m[astronave.id][1]==ASTRONAVE2){
+			if(tipoColliso==ASTRONAVE1 || tipoColliso==ASTRONAVE2){
 				direction *= (-1);
 			}
 		}
-		pthread_mutex_unlock(&mutex_collision);
 
 		//Se la navicella e' ancora viva effettuo lo spostamento
 		if(astronave.vite>0){
@@ -322,7 +341,11 @@ void* t_astronave1 (void* arg){
 			if(astronave.x + direction == MAXX - astronave.dim || astronave.x + direction == MINX) {
 				direction = -direction;
 				astronave.y+=2;
-				if(astronave.y >= MAXY -2) end_layer=true;
+				if(astronave.y >= MAXY -2) {
+					pthread_mutex_lock(&mutex_end);
+					end_layer=true;
+					pthread_mutex_unlock(&mutex_end);
+				}
 			}
 			else{//altrimenti proseguo nella stessa direzione		
 				astronave.x += direction;
@@ -360,12 +383,16 @@ void* t_astronave1 (void* arg){
 	}
 
 	//se ha 0 vite (quindi si 'e creata la lv2, aspetto che finisca)
-	if(astronave.vite >= 0) pthread_join (astronaveLV2, NULL);
+	if(astronave.vite <= 0){pthread_join (astronaveLV2, NULL);}
+	
 	
 	while (l != NULL) {
 		pthread_join (l->info, NULL);
         	l = l->next;
     	}
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +9, 2, "t_astronave1 %d:ok", astronave.id); 
+	pthread_mutex_unlock(&mutex_scrn);
 
 	return NULL;
 }
@@ -377,24 +404,28 @@ void* t_astronave1 (void* arg){
 */ 
 void* t_generatore_astronavi(void* arg){
 	int count = 0;
-
 	pthread_t astronave[N_ASTONAVI_NEMICHE]; 
-	int* id_astronavi;
 
-	while(count < N_ASTONAVI_NEMICHE) {
-		id_astronavi= (int *) malloc(sizeof(int));
-		//*id_astronavi = count +10;
+	while(count < N_ASTONAVI_NEMICHE && !partitaFinita()) {
 		if(pthread_create(&astronave[count], NULL, t_astronave1, NULL)){ endwin(); exit;}		
-
 		count++;
 		usleep(DELAY_ASTRONAVI);
 	}
-
+	
 	while(count > 0){
 		pthread_join (astronave[count-1], NULL);
 		count--;
 	}
-	end_enemis = true;
+	
+	if(!partitaFinita()){
+		pthread_mutex_lock(&mutex_end);
+		end_enemis = true;
+		pthread_mutex_unlock(&mutex_end);
+	}
+	
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +8, 2, "t_generatore_astronavi:ok"); 
+	pthread_mutex_unlock(&mutex_scrn);
 }
 
 

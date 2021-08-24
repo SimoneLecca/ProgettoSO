@@ -22,22 +22,29 @@ void* t_missile(void* arg){
 	missile.y = MAXY-MINY-2;
 	missile.vite=1;
 
-	while(missile.vite > 0){
+	while(missile.vite > 0 && !partitaFinita()){
 		/*Controllo se il missile ha Colliso*/
 		pthread_mutex_lock(&mutex_collision);
-		if(collision_m[missile.id][0]==1){
+		int colliso= collision_m[missile.id][0];
+		pthread_mutex_unlock(&mutex_collision);
+
+		if(colliso==1 || partitaFinita()){
+			pthread_mutex_lock(&mutex_collision);
 			collision_m[missile.id][0]=0;
+			pthread_mutex_unlock(&mutex_collision);
 			missile.vite--;
 		}
-		pthread_mutex_unlock(&mutex_collision);
-		
-		if(missile.vite>0) missile.y--; //Aggiorno posizione missile e lo passo ad aggiungi_job se e' ancora vivo
+		else if(missile.vite>0) {missile.y--;} //Aggiorno posizione missile e lo passo ad aggiungi_job se e' ancora vivo
 		
 		aggiungi_job(missile);
 		usleep(DELAY);
 	}
+	
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +4, 2, "t_missili:ok"); 
+	pthread_mutex_unlock(&mutex_scrn);
 
-	return NULL;
+	//return NULL;
 	
 }
 /*thread che si occupa del lacio dei missili una volta che il giocatore preme spazio*/
@@ -51,9 +58,9 @@ void* t_lanciatore_missili(void* arg){
 	
 	while(!partitaFinita()){
 		pthread_mutex_lock(&mutex_fire);
-			flag= (bool)fire[0]; // fire variabile globale che in posizione 0 contine un flag che avvisa quando il giocatore preme spazio
-			id_missile[1]=fire[1];
-			id_missile2[1]=fire[1]+5;
+		flag= (bool)fire[0]; // fire variabile globale che in posizione 0 contine un flag che avvisa quando il giocatore preme spazio
+		id_missile[1]=fire[1];
+		id_missile2[1]=fire[1]+5;
 		pthread_mutex_unlock(&mutex_fire);
 		// se il giocatore preme spazio allora faccio partire i thread dei missili
 		if (flag){		
@@ -66,9 +73,15 @@ void* t_lanciatore_missili(void* arg){
 			fire[0]= 0; // aggiorno il flag 
 			pthread_mutex_unlock(&mutex_fire);	
 		}
-	}
+	}	
 	free(id_missile);/// liberare memoria della malloc
 	free(id_missile2);
+
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +5, 2, "t_lanciatoreMissili:ok"); 
+	pthread_mutex_unlock(&mutex_scrn);
+	
+	pthread_exit((void *) 0);
 }
 
 void* t_gStatus(void* arg){
@@ -78,34 +91,56 @@ void* t_gStatus(void* arg){
 	pthread_mutex_unlock(&mutex_player);
 	aggiungi_job(giocatore); // invio nel bufffer la prima posizione
 	
-	while(giocatore.vite > 0 || partitaFinita()) {
+	while(giocatore.vite > 0 && !partitaFinita()) {
 		
 
 		/*Controllo se il missile ha Colliso*/
 		pthread_mutex_lock(&mutex_collision);
-		if(collision_m[giocatore.id][0]==1 && collision_m[giocatore.id][1]==BOMBA){
-			collision_m[giocatore.id][0]=0;
+		int colliso= collision_m[giocatore.id][0];
+		int tipoColliso = collision_m[giocatore.id][1];
+		pthread_mutex_unlock(&mutex_collision);
+
+		if(colliso==1 && tipoColliso==BOMBA){
+			
 			giocatore.vite--; //flash(); beep();
 			aggiornaPunteggio(-20);
 
-			pthread_mutex_unlock(&mutex_player);
+			pthread_mutex_lock(&mutex_player);
 			player.vite=giocatore.vite;
 			pthread_mutex_unlock(&mutex_player);	
 		}
-		else{collision_m[giocatore.id][0]=0;}
+
+		pthread_mutex_lock(&mutex_collision);
+		collision_m[giocatore.id][0]=0;
 		pthread_mutex_unlock(&mutex_collision);
-		
-		pthread_mutex_unlock(&mutex_player);
+
+		/*aggiorno la posizione del player*/
+		pthread_mutex_lock(&mutex_player);
 		giocatore= player;
-		aggiungi_job(giocatore);
 		pthread_mutex_unlock(&mutex_player);
+		aggiungi_job(giocatore);
 		usleep(DELAY);
 
 		
 	}
-
+	
 	//Se il giocatore esce dal ciclo e non ha piu vite vuol dire che ha perso
-	if(giocatore.vite <= 0) end_player = true;
+	if(giocatore.vite <= 0) {
+		pthread_mutex_lock(&mutex_scrn); 
+		mvprintw(MAXY +6, 2, "t_GsTATUS:ok"); 
+		pthread_mutex_unlock(&mutex_scrn);
+
+		pthread_mutex_lock(&mutex_end);
+		end_player = true;
+		pthread_mutex_unlock(&mutex_end);
+	}
+
+	aggiungi_job(giocatore);
+
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +6, 2, "t_GsTATUS:ok"); 
+	pthread_mutex_unlock(&mutex_scrn);
+	pthread_exit((void *) 0);
 }
 
 /*si occupa di aggiornare la posizione della navicella del giocatore alla pressione dei tasti direzionali, aggiorna il fire "spara i missili" quando il giocatore preme spazio*/
@@ -118,9 +153,8 @@ void* t_giocatore(void* arg)
 
 	char c; // contiene il caratte premuto da tastiera
 	
-	aggiungi_job(giocatore); // invio nel bufffer la prima posizione
-	
 	//finche la partita non finisce continua a prendere gli input dell'utente
+	//usleep(DELAY*100);
 	while(!partitaFinita()) {
 		switch(c=getch()) {
 			// se preme destra o sinistra aggiono la posizione della navicella
@@ -143,17 +177,17 @@ void* t_giocatore(void* arg)
 				}
 				pthread_mutex_unlock(&mutex_fire);
 				break;
-			}
+		}
 		/*aggiorno la posizione del player*/
-		pthread_mutex_unlock(&mutex_player);
+		pthread_mutex_lock(&mutex_player);
 		player.x=giocatore.x;
 		player.y=giocatore.y;
 		pthread_mutex_unlock(&mutex_player);
 		
 	}
-
-	//Se esce dal ciclo vuol dire che il giocatore ha finito le vite, quindi perde.
-	end_player = true;
+	pthread_mutex_lock(&mutex_scrn); 
+	mvprintw(MAXY +7, 2, "t_giocatore:ok"); 
+	pthread_mutex_unlock(&mutex_scrn);
 }
 
 

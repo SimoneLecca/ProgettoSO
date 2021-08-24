@@ -39,10 +39,10 @@
 #define BOMBA 6
 
 //PLAYER
-#define N_VITE 2
+#define N_VITE 1
 
 //NEMICI
-#define N_ASTONAVI_NEMICHE 3	//n di astronavi nemiche totali
+#define N_ASTONAVI_NEMICHE 2	//n di astronavi nemiche totali
 #define DELAY_ASTRONAVI 2000000 //delay tra un'astronave nemica e l'altra
 
 // dimensione buffer
@@ -87,6 +87,7 @@ void aggiungi_job (struct oggetto);
 void stampaOggetto(struct oggetto);
 void cancellaOggetto(struct oggetto, int);
 int isColliding(struct oggetto, struct oggetto[]);
+//bool partitaFinita();
 
 int punteggio;
 int counter; // contatore per il buffer
